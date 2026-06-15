@@ -182,18 +182,18 @@
 
 ### UI — Bloco de Contexto
 
-- [ ] T060 [US5] Implementar Server Action `requestContextUpdate()` em `src/lib/actions/ai-jobs.ts`: validar que startup tem dados suficientes (ao menos 1 entre okrs/metrics/portfolio_activities/operational_assessments no quarter atual), INSERT ai_jobs com status "Pendente", retornar jobId
-- [ ] T061 [US5] Implementar Server Action `saveContextEdit()` em `src/lib/actions/ai-jobs.ts`: INSERT nova context_versions com `was_manually_edited = true`, preservar versão anterior
-- [ ] T062 [US5] Construir componente `ContextSection` em `src/components/portfolio/ContextSection.tsx` com: exibição da última versão do contexto, botão "Atualizar Contexto" (chama `requestContextUpdate()`), status do job ("Pendente"/"Processando"/"Concluído"/"Erro"/"Aguardando worker"), editor de texto para edição manual, botão "Salvar edição", polling de status a cada 10s quando job ativo via `useEffect` + `router.refresh()`
-- [ ] T063 [P] [US5] Construir componente `ContextHistory` em `src/components/portfolio/ContextHistory.tsx` com: lista de versões (data, modelo, versão do prompt, flag de edição manual), expansão para ver conteúdo de versão anterior, seleção de versão para exibir
+- [x] T060 [US5] Implementar Server Action `requestContextUpdate()` em `src/lib/actions/ai-jobs.ts`: validar que startup tem dados suficientes (ao menos 1 entre okrs/metrics/portfolio_activities/operational_assessments no quarter atual), INSERT ai_jobs com status "Pendente", retornar jobId
+- [x] T061 [US5] Implementar Server Action `saveContextEdit()` em `src/lib/actions/ai-jobs.ts`: INSERT nova context_versions com `was_manually_edited = true`, preservar versão anterior
+- [x] T062 [US5] Construir componente `ContextSection` em `src/components/portfolio/ContextSection.tsx` com: exibição da última versão do contexto, botão "Atualizar Contexto" (chama `requestContextUpdate()`), status do job ("Pendente"/"Processando"/"Concluído"/"Erro"/"Aguardando worker"), editor de texto para edição manual, botão "Salvar edição", polling de status a cada 10s quando job ativo via `useEffect` + `router.refresh()`
+- [x] T063 [P] [US5] Construir componente `ContextHistory` em `src/components/portfolio/ContextHistory.tsx` com: lista de versões (data, modelo, versão do prompt, flag de edição manual), expansão para ver conteúdo de versão anterior, seleção de versão para exibir
 
 ### Worker IA
 
-- [ ] T063a [US5] Criar `worker/package.json` com dependências do processo separado: `@supabase/supabase-js`, `node-fetch`, `dotenv`; criar `worker/.env.example` documentando todas as variáveis obrigatórias: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `POLL_INTERVAL_MS`, `STUCK_JOB_TIMEOUT_MIN` — o worker NUNCA compartilha variáveis de ambiente com o Next.js; `.env.example` vai no git, `.env` do worker vai no `.gitignore`
-- [ ] T064 [US5] Criar `worker/providers/ollama.js` com: `async fetchCompletion(prompt): Promise<string>` — POST para `http://localhost:11434/api/generate` com `{ model, prompt, stream: false, options: { temperature: 0.3, num_predict: 2048 } }`, timeout de 120s via AbortController, tratamento de todos os erros definidos em `contracts/ollama-contract.md`
-- [ ] T065 [US5] Criar `worker/context-builder.js` com: `async buildStartupContext(supabase, startupId, quarter): Promise<object>` — busca dados da startup (perfil, assessments recentes, OKRs do quarter, métricas, 10 atividades recentes) conforme SQL em `contracts/worker-contract.md`
-- [ ] T066 [US5] Criar `worker/prompt-template.js` com: `buildPrompt(startupContext): string` — template v1 definido em `contracts/worker-contract.md` (5 seções: Histórico, Avanços, Desafios, Métricas, Próximos pontos), `PROMPT_VERSION = "v1"`
-- [ ] T067 [US5] Criar `worker/index.js` com: (a) conexão Supabase via service role key; (b) recuperação de stuck jobs na inicialização (UPDATE status='Pendente' onde 'Processando' há > 10min); (c) polling loop com `setInterval(POLL_INTERVAL_MS)` seguindo ciclo de vida completo de `contracts/worker-contract.md` (SELECT → UPDATE Processando → buildContext → buildPrompt → fetchCompletion → INSERT context_versions → UPDATE Concluído/Erro); (d) logging estruturado de cada etapa
+- [x] T063a [US5] Criar `worker/package.json` com dependências do processo separado: `@supabase/supabase-js`, `node-fetch`, `dotenv`; criar `worker/.env.example` documentando todas as variáveis obrigatórias: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `OLLAMA_BASE_URL`, `OLLAMA_MODEL`, `POLL_INTERVAL_MS`, `STUCK_JOB_TIMEOUT_MIN` — o worker NUNCA compartilha variáveis de ambiente com o Next.js; `.env.example` vai no git, `.env` do worker vai no `.gitignore`
+- [x] T064 [US5] Criar `worker/providers/ollama.js` com: `async fetchCompletion(prompt): Promise<string>` — POST para `http://localhost:11434/api/generate` com `{ model, prompt, stream: false, options: { temperature: 0.3, num_predict: 2048 } }`, timeout de 120s via AbortController, tratamento de todos os erros definidos em `contracts/ollama-contract.md`
+- [x] T065 [US5] Criar `worker/context-builder.js` com: `async buildStartupContext(supabase, startupId, quarter): Promise<object>` — busca dados da startup (perfil, assessments recentes, OKRs do quarter, métricas, 10 atividades recentes) conforme SQL em `contracts/worker-contract.md`
+- [x] T066 [US5] Criar `worker/prompt-template.js` com: `buildPrompt(startupContext): string` — template v1 definido em `contracts/worker-contract.md` (5 seções: Histórico, Avanços, Desafios, Métricas, Próximos pontos), `PROMPT_VERSION = "v1"`
+- [x] T067 [US5] Criar `worker/index.js` com: (a) conexão Supabase via service role key; (b) recuperação de stuck jobs na inicialização (UPDATE status='Pendente' onde 'Processando' há > 10min); (c) polling loop com `setInterval(POLL_INTERVAL_MS)` seguindo ciclo de vida completo de `contracts/worker-contract.md` (SELECT → UPDATE Processando → buildContext → buildPrompt → fetchCompletion → INSERT context_versions → UPDATE Concluído/Erro); (d) logging estruturado de cada etapa
 
 **Checkpoint**: US5 funcional — geração via Ollama, jobs persistentes, edição manual, histórico de versões.
 
@@ -203,13 +203,13 @@
 
 **Purpose**: Wiki, estados de erro/loading, conformidade com design system, validação final.
 
-- [ ] T068 Criar arquivos MDX da Wiki de Metodologia em `src/content/metodologia/`: `index.mdx` (visão geral da metodologia IARIS), `assessment.mdx` (guia do framework de Assessment com os 38 critérios e rubricas)
-- [ ] T069 [P] Construir páginas da Wiki em `src/app/(app)/metodologia/[...slug]/page.tsx` com `next-mdx-remote`, estilização com design system, tabelas de critérios renderizadas como componentes
-- [ ] T070 [P] Adicionar Skeleton loaders para todas as páginas com dados assíncronos (`src/components/ui/Skeleton.tsx` já criado no T016 — aplicar em todas as rotas)
-- [ ] T071 [P] Adicionar Error Boundaries e estados de erro (`src/app/(app)/error.tsx`, `src/app/(app)/crm/error.tsx`, `src/app/(app)/portfolio/error.tsx`) com mensagem amigável e botão de retry
-- [ ] T072 Revisar conformidade de design system em todas as telas: (a) fundo Deep Navy `#000033` em todas as camadas base; (b) botões primários Teal `#009999` com 0px border-radius; (c) ausência de `box-shadow` — substituir por variações de `background-color` para profundidade; (d) grid de 30px como background pattern; (e) fontes Hanken Grotesk em headings, Plus Jakarta Sans em body
-- [ ] T073 Rodar `npx tsc --noEmit` e corrigir todos os erros de tipo
-- [ ] T074 [P] Rodar `npm run lint` e corrigir todos os warnings de lint
+- [x] T068 Criar arquivos MDX da Wiki de Metodologia em `src/content/metodologia/`: `index.mdx` (visão geral da metodologia IARIS), `assessment.mdx` (guia do framework de Assessment com os 38 critérios e rubricas)
+- [x] T069 [P] Construir páginas da Wiki em `src/app/(app)/metodologia/[...slug]/page.tsx` com `next-mdx-remote`, estilização com design system, tabelas de critérios renderizadas como componentes
+- [x] T070 [P] Adicionar Skeleton loaders para todas as páginas com dados assíncronos (`src/components/ui/Skeleton.tsx` já criado no T016 — aplicar em todas as rotas)
+- [x] T071 [P] Adicionar Error Boundaries e estados de erro (`src/app/(app)/error.tsx`, `src/app/(app)/crm/error.tsx`, `src/app/(app)/portfolio/error.tsx`) com mensagem amigável e botão de retry
+- [x] T072 Revisar conformidade de design system em todas as telas: (a) fundo Deep Navy `#000033` em todas as camadas base; (b) botões primários Teal `#009999` com 0px border-radius; (c) ausência de `box-shadow` — substituir por variações de `background-color` para profundidade; (d) grid de 30px como background pattern; (e) fontes Hanken Grotesk em headings, Plus Jakarta Sans em body
+- [x] T073 Rodar `npx tsc --noEmit` e corrigir todos os erros de tipo
+- [x] T074 [P] Rodar `npm run lint` e corrigir todos os warnings de lint
 - [ ] T075 Executar os 5 cenários de validação do `specs/001-iaris-portfolio-os-mvp/quickstart.md` e documentar resultado de cada etapa
 
 ---
