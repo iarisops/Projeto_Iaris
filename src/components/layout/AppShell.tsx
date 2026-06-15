@@ -21,8 +21,8 @@ export default async function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 flex flex-col bg-surface border-r border-border">
+      {/* Sidebar — keeps dark navy regardless of global light theme */}
+      <aside className="dark-surface w-56 shrink-0 flex flex-col bg-surface border-r border-border">
         {/* Logo */}
         <div className="px-4 py-5 border-b border-border">
           <Link href="/">

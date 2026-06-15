@@ -7,7 +7,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <Image
-            src="/assets/Logo-IARIS-fundo escuro.png"
+            src="/assets/Logo-IARIS.png"
             alt="IARIS"
             width={140}
             height={40}

@@ -1,58 +1,23 @@
 ---
-name: Iaris Ventures Nexus
+name: IARIS Portfolio OS — Design System
 colors:
-  surface: '#121414'
-  surface-dim: '#121414'
-  surface-bright: '#37393a'
-  surface-container-lowest: '#0c0f0f'
-  surface-container-low: '#1a1c1c'
-  surface-container: '#1e2020'
-  surface-container-high: '#282a2b'
-  surface-container-highest: '#333535'
-  on-surface: '#e2e2e2'
-  on-surface-variant: '#bcc9c8'
-  inverse-surface: '#e2e2e2'
-  inverse-on-surface: '#2f3131'
-  outline: '#869393'
-  outline-variant: '#3d4949'
-  surface-tint: '#65d8d7'
-  primary: '#65d8d7'
-  on-primary: '#003737'
-  primary-container: '#1aa1a1'
-  on-primary-container: '#002f2f'
-  inverse-primary: '#006a6a'
-  secondary: '#ffb94c'
-  on-secondary: '#442b00'
-  secondary-container: '#c48402'
-  on-secondary-container: '#3b2500'
-  tertiary: '#bfc2fb'
-  on-tertiary: '#282c5b'
-  tertiary-container: '#898cc2'
-  on-tertiary-container: '#222554'
-  error: '#ffb4ab'
-  on-error: '#690005'
-  error-container: '#93000a'
-  on-error-container: '#ffdad6'
-  primary-fixed: '#83f4f4'
-  primary-fixed-dim: '#65d8d7'
-  on-primary-fixed: '#002020'
-  on-primary-fixed-variant: '#004f4f'
-  secondary-fixed: '#ffddb2'
-  secondary-fixed-dim: '#ffb94c'
-  on-secondary-fixed: '#291800'
-  on-secondary-fixed-variant: '#624000'
-  tertiary-fixed: '#e0e0ff'
-  tertiary-fixed-dim: '#bfc2fb'
-  on-tertiary-fixed: '#131645'
-  on-tertiary-fixed-variant: '#3f4273'
-  background: '#121414'
-  on-background: '#e2e2e2'
-  surface-variant: '#333535'
-  deep-navy: '#000033'
-  vibrant-teal: '#009999'
+  background:       '#f5f7fc'
+  surface:          '#ffffff'
+  surface-2:        '#eceef7'
+  border:           '#e2e8f4'
+  border-subtle:    '#f0f2f8'
+  text-primary:     '#0d1226'
+  text-secondary:   '#4d5b7c'
+  text-muted:       '#8492b0'
+  deep-navy:        '#000033'
+  vibrant-teal:     '#009999'
   innovation-amber: '#fbb33d'
-  slate-blue: '#303f59'
-  marker-blue: '#6787bf'
+  slate-blue:       '#303f59'
+  marker-blue:      '#6787bf'
+  signal-red:       '#e53e3e'
+  signal-orange:    '#dd6b20'
+  signal-yellow:    '#d69e2e'
+  signal-green:     '#38a169'
 typography:
   headline-xl:
     fontFamily: Hanken Grotesk
@@ -92,12 +57,9 @@ typography:
     fontWeight: '600'
     lineHeight: '1.4'
 rounded:
-  sm: 0.125rem
-  DEFAULT: 0.25rem
-  md: 0.375rem
-  lg: 0.5rem
-  xl: 0.75rem
-  full: 9999px
+  none: 0px
+  sm: 4px
+  md: 6px
 spacing:
   unit: 4px
   gutter: 24px
@@ -108,82 +70,131 @@ spacing:
 
 ## Brand & Style
 
-This design system is engineered for a venture building and startup ecosystem context, prioritizing a "Professional-Tech-Dynamic" aesthetic. It balances the high-stakes world of finance and law with the creative, rapid-fire energy of innovation. 
+The IARIS Portfolio OS design system uses a **light-mode default** — clean, professional, and readable — while retaining the full IARIS brand palette as accent and navigation colors.
 
-The visual identity is anchored in **Corporate Modernism** with a heavy infusion of **Technical Geometricism**. It uses a sophisticated dark-mode default to convey stability and authority, while utilizing vibrant teal and amber accents to represent energy and "sparks" of innovation.
+The aesthetic is **Corporate Clarity**: white and off-white surfaces with deep navy navigation, vibrant teal as the primary action color, and subtle blue-gray borders for structure. Typography is precise and hierarchical.
 
 **Visual Pillars:**
-- **Technical Precision:** Use of grid markers, mathematical "X" and "+" symbols, and dashed lines to evoke engineering blueprints.
-- **Human Creativity:** Juxtaposition of strict grids with organic, "scribble" style lineart (doodles) to represent the messy but brilliant process of ideation.
-- **Dynamic Growth:** High-contrast photography and aggressive diagonal patterns emphasize movement and scale.
+- **Light & Airy Surfaces:** White cards, light gray page backgrounds, barely-there borders convey trust and clarity.
+- **Dark Navy Sidebar:** The navigation column stays in Deep Navy (#000033) — the anchor of IARIS brand identity.
+- **Teal as Action:** Vibrant Teal (#009999) marks every interactive, active, and progress element.
+- **Technical Grid:** 30px blueprint grid as background texture, now rendered in the light border color (`#e2e8f4`).
 
 ## Colors
 
-The palette is built on a "High-Saturation Professional" logic. The foundation is **Deep Navy (#000033)**, which serves as the primary canvas for most surfaces. 
+### Light Theme (default for all app pages)
 
-**Vibrant Teal (#009999)** is the primary action color, used for high-visibility UI elements, progress indicators, and primary buttons. **Innovation Amber (#fbb33d)** is the accent color, reserved exclusively for highlights, call-outs, and decorative lineart to ensure it remains impactful. 
+| Token | Value | Use |
+|---|---|---|
+| `--color-background` | `#f5f7fc` | Page background |
+| `--color-surface` | `#ffffff` | Cards, panels, modals |
+| `--color-surface-2` | `#eceef7` | Secondary surfaces, Kanban columns, input backgrounds |
+| `--color-border` | `#e2e8f4` | All borders, dividers |
+| `--color-border-subtle` | `#f0f2f8` | Subtle dividers inside cards |
+| `--color-text-primary` | `#0d1226` | Headings, primary labels |
+| `--color-text-secondary` | `#4d5b7c` | Body text, descriptions |
+| `--color-text-muted` | `#8492b0` | Metadata, timestamps, helper text |
 
-**Slate Blue (#303f59)** and **Marker Blue (#6787bf)** are utilized for technical grid patterns and secondary borders, providing depth without competing with the primary brand colors. All text on dark backgrounds must be pure white or high-lightness teal to maintain accessibility.
+### Brand Colors (always fixed, never overridden by theme)
+
+| Token | Value | Use |
+|---|---|---|
+| `--color-deep-navy` | `#000033` | Sidebar background, dark overlays |
+| `--color-vibrant-teal` | `#009999` | Primary buttons, active states, progress |
+| `--color-innovation-amber` | `#fbb33d` | Accent highlights, warnings |
+| `--color-slate-blue` | `#303f59` | Sidebar borders |
+| `--color-marker-blue` | `#6787bf` | Secondary accents |
+
+### Signal Colors
+
+| Token | Value |
+|---|---|
+| `--color-signal-green` | `#38a169` |
+| `--color-signal-red` | `#e53e3e` |
+| `--color-signal-orange` | `#dd6b20` |
+| `--color-signal-yellow` | `#d69e2e` |
+
+### Dark Surface Override
+
+Components that must retain the dark brand identity (sidebar, any brand splash) use the `.dark-surface` CSS class. This class locally overrides all semantic color tokens back to deep navy values, so all semantic Tailwind classes (`bg-surface`, `text-text-primary`, etc.) resolve to dark values within that subtree.
+
+```css
+.dark-surface {
+  --color-background:     #000033;
+  --color-surface:        #0a0f2e;
+  --color-surface-2:      #111840;
+  --color-border:         #303f59;
+  --color-border-subtle:  #1e2a40;
+  --color-text-primary:   #f0f4ff;
+  --color-text-secondary: #8fa3c8;
+  --color-text-muted:     #4a5f80;
+}
+```
 
 ## Typography
 
-The typography strategy uses a trio of modern sans-serifs to distinguish between brand impact and technical utility.
+Three typefaces, each with a distinct role:
 
-- **Hanken Grotesk** is used for headlines. Its sharp, contemporary architecture reflects the brand’s professional and technological focus. Use "ExtraBold" for main display titles to maximize impact.
-- **Plus Jakarta Sans** is the primary body face. Its friendly, open counters ensure high readability for long-form content regarding venture terms and startup news.
-- **Geist** is used for labels, captions, and data-heavy technical sections. Its monospaced-adjacent feel reinforces the "developer/tech" ecosystem narrative.
+- **Hanken Grotesk** (`font-headline`) — all headings. Sharp, geometric, institutional.
+- **Plus Jakarta Sans** (`font-body`) — body and paragraph text. Friendly, open, readable.
+- **Geist** (`font-label`) — labels, metadata, captions, code. Technical precision.
 
-**Refinement:** Titles should frequently use "title case" for a more institutional feel, while labels should utilize uppercase with slight letter spacing to act as structural anchors in the layout.
+Labels use uppercase + letter-spacing (`font-label text-[10px] uppercase tracking-wide`) for structural anchoring.
 
-## Layout & Spacing
+## Layout & Elevation
 
-This design system employs a **Fixed-Fluid Hybrid Grid**. Content is housed in a 12-column container on desktop, but the background utilizes edge-to-edge patterns and textures.
+Hierarchy is established through **Tonal Layering**, not shadows:
 
-**The Blueprint Grid:**
-A signature element is the 30px technical marker grid. Small "+" and "X" symbols should be placed at 30px intervals in background layers. 
+1. **Page:** `#f5f7fc` (very light blue-gray)
+2. **Card / Panel:** `#ffffff` (white) with `1px solid #e2e8f4` border
+3. **Secondary container / Kanban column:** `#eceef7`
+4. **Hover / active card:** `border-[#009999]/50` border highlight
 
-**Diagonal Rhythm:**
-Use 45-degree diagonal stripes as containers for secondary information or as section transitions. These stripes should follow a consistent weight of ~6px with ~13px intervals.
+No `box-shadow` on surfaces. Use border + background tint for depth.
 
-**Mobile Reflow:**
-On mobile, margins compress to 16px. Typography scales down (Headline XL becomes 32px), but the technical markers remain the same size (30px) to maintain their "instrument-like" feel.
+### Kanban-specific
 
-## Elevation & Depth
-
-Hierarchy is established through **Tonal Layering** and **Transparency** rather than traditional shadows.
-
-1.  **Base Layer:** Deep Navy (#000033).
-2.  **Pattern Layer:** Technical markers and diagonal stripes (Marker Blue at 20-40% opacity).
-3.  **Container Layer:** Surfaces are created using Slate Blue (#303f59) with no shadow, but 1px solid borders in Teal or Marker Blue.
-4.  **Accent Layer:** Lineart doodles and "highlighter" blocks in Innovation Amber or Teal.
-
-Use **Low-Contrast Outlines** for cards. Instead of shadows, use a 1px border that is slightly lighter than the background color to create a subtle "cut-out" effect. Semi-transparent overlays (64% alpha) should be used on images to allow technical patterns to bleed through.
-
-## Shapes
-
-The shape language is primarily **Sharp and Geometric**. 
-
-- **Containers:** Standard cards and input fields should use a "Soft" (0.25rem) radius. This provides a professional touch without feeling "bubbly."
-- **Buttons:** Primary buttons should be sharp (0px radius) to emphasize the brand's architectural rigor.
-- **Accent Elements:** The "hourglass" diamond shape from the logo is the primary geometric motif. Use it as a mask for images or as a bullet point in lists.
-- **Lineart:** All illustrations must maintain a hand-drawn, "sketch" feel. The stroke weight should be consistent across all doodles to ensure they feel part of the same "brainstorming" session.
+- Column background: `#eceef7/60` at rest, `#009999/8` while a card is dragged over
+- Column header: count badge as small circle `bg-[#e2e8f4] text-[#4d5b7c]`
+- Card: `bg-white border border-[#e2e8f4] hover:border-[#009999]/50`
 
 ## Components
 
-**Buttons:**
-Primary buttons are rectangular with 0px roundedness, filled in Vibrant Teal with White text. Secondary buttons use a Teal "ghost" style with a 2px border. Use Innovation Amber for "Warning" or "High-Attention" states.
+### Buttons
 
-**Chips / Tags:**
-Use for categories like "Fintech," "Legal," or "SaaS." These should have a background color of Slate Blue and a 1px border. The text should be set in Geist Label-sm.
+Primary: rectangular, **0px radius**, Teal fill (`bg-primary`), white text.  
+Secondary/ghost: `bg-surface-2 text-text-primary border border-border`.
 
-**Technical Pattern Backgrounds:**
-Every major section should have a subtle technical marker background. The markers (+) should be placed at the intersections of the layout grid where possible.
+### Cards
 
-**Input Fields:**
-Fields are dark-themed. Background: Deep Navy. Border: 1px Slate Blue. On focus, the border transitions to Vibrant Teal with a subtle outer glow (no blur).
+White background, 1px `#e2e8f4` border, 0px radius. Hover: teal border highlight, optional light shadow.
 
-**Cards:**
-Startup cards should feature an image with a Teal overlay at 30% opacity. The footer of the card should be a solid block of Slate Blue, housing the metadata in Geist typography.
+### Input Fields
 
-**Lineart Integration:**
-Doodles (lightbulbs, arrows, puzzles) should never be the "hero" element. They should act as "marginalia," placed slightly off-center or overlapping the edges of cards and containers to give a sense of organic growth within the rigid grid.
+Background: `bg-surface-2` (`#eceef7`). Border: `1px solid #e2e8f4`. Focus: border transitions to Vibrant Teal.
+
+### Tags / Chips
+
+Small, 0px radius. Teal-tinted: `bg-[#eef8f8] text-[#007a7a] border border-[#009999]/20`.
+
+### Technical Grid Background
+
+`.bg-grid` — 30px blueprint grid using `--color-border` (`#e2e8f4`) on light surfaces. Low-contrast, structural accent.
+
+### Navigation (Sidebar)
+
+The sidebar always uses `.dark-surface`. Logo: `Logo-IARIS-fundo escuro.png`. Nav links use `text-text-secondary hover:text-text-primary hover:bg-surface-2` (resolving to dark-theme values inside `.dark-surface`).
+
+### Logos
+
+| Context | Asset |
+|---|---|
+| Sidebar (dark navy bg) | `Logo-IARIS-fundo escuro.png` |
+| Light pages (login, headers) | `Logo-IARIS.png` |
+| Icon-only | `simbolo-IARIS-azul.svg` or `simbolo-IARIS-branco.svg` |
+
+## Shapes
+
+- **All containers, cards, inputs:** 0px radius (sharp) as the default.
+- **Small UI affordances** (count badges, avatars): `rounded-full`.
+- **Modal corners:** 0px (consistent with card language).

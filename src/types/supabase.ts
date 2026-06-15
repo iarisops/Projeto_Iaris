@@ -315,6 +315,45 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          id: string
+          linkedin: string | null
+          name: string
+          notes: string | null
+          updated_at: string | null
+          updated_by: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          linkedin?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          linkedin?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string | null
@@ -1043,6 +1082,7 @@ export type Database = {
           customers: string | null
           email: string | null
           equity: string | null
+          extra_fields: Json | null
           funnel_id: string
           general_note: string | null
           history_evolution: string | null
@@ -1055,6 +1095,7 @@ export type Database = {
           next_action: string | null
           phase: string | null
           pitch_deck_url: string | null
+          primary_contact_id: string | null
           reminder_note: string | null
           result: string
           score: number | null
@@ -1075,6 +1116,7 @@ export type Database = {
           customers?: string | null
           email?: string | null
           equity?: string | null
+          extra_fields?: Json | null
           funnel_id: string
           general_note?: string | null
           history_evolution?: string | null
@@ -1087,6 +1129,7 @@ export type Database = {
           next_action?: string | null
           phase?: string | null
           pitch_deck_url?: string | null
+          primary_contact_id?: string | null
           reminder_note?: string | null
           result?: string
           score?: number | null
@@ -1107,6 +1150,7 @@ export type Database = {
           customers?: string | null
           email?: string | null
           equity?: string | null
+          extra_fields?: Json | null
           funnel_id?: string
           general_note?: string | null
           history_evolution?: string | null
@@ -1119,6 +1163,7 @@ export type Database = {
           next_action?: string | null
           phase?: string | null
           pitch_deck_url?: string | null
+          primary_contact_id?: string | null
           reminder_note?: string | null
           result?: string
           score?: number | null

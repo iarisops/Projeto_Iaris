@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import type { FunnelFormConfig } from '@/lib/types/form-config'
 
 // ─── Default stages (data-model.md) ──────────────────────────
 
@@ -258,6 +259,89 @@ export async function updatePanelEvaluationForm(
   if (error) return { error: error.message }
   return {}
 }
+
+// ─── archiveStageWithRedirect ─────────────────────────────────
+
+export async function archiveStageWithRedirect(
+  stageId: string,
+  targetStageId: string | null
+): Promise<{ error?: string }> {
+  if (!stageId) return { error: 'ID da etapa inválido.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const now = new Date().toISOString()
+
+  // Move candidates to target stage (or clear stage_id)
+  const { error: moveError } = await supabase
+    .from('startup_candidates')
+    .update({ stage_id: targetStageId, last_update_at: now, updated_at: now, updated_by: user.id })
+    .eq('stage_id', stageId)
+  if (moveError) return { error: moveError.message }
+
+  // Archive the stage
+  const { error } = await supabase
+    .from('funnel_stages')
+    .update({ is_archived: true, updated_at: now })
+    .eq('id', stageId)
+  if (error) return { error: error.message }
+
+  return {}
+}
+
+// ─── deleteStageWithRedirect ──────────────────────────────────
+
+export async function deleteStageWithRedirect(
+  stageId: string,
+  targetStageId: string | null
+): Promise<{ error?: string }> {
+  if (!stageId) return { error: 'ID da etapa inválido.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const now = new Date().toISOString()
+
+  const { error: moveError } = await supabase
+    .from('startup_candidates')
+    .update({ stage_id: targetStageId, last_update_at: now, updated_at: now, updated_by: user.id })
+    .eq('stage_id', stageId)
+  if (moveError) return { error: moveError.message }
+
+  const { error } = await supabase
+    .from('funnel_stages')
+    .delete()
+    .eq('id', stageId)
+  if (error) return { error: error.message }
+
+  return {}
+}
+
+// ─── updateFunnelFormConfig ───────────────────────────────────
+
+export async function updateFunnelFormConfig(
+  funnelId: string,
+  config: FunnelFormConfig
+): Promise<{ error?: string }> {
+  if (!funnelId) return { error: 'ID do funil inválido.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { error } = await supabase
+    .from('funnels')
+    .update({ form_config: config as unknown as never, updated_at: new Date().toISOString(), updated_by: user.id })
+    .eq('id', funnelId)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
+// ─── duplicatePanelEvaluationForm ────────────────────────────
 
 export async function duplicatePanelEvaluationForm(
   id: string,
