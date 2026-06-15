@@ -288,6 +288,68 @@ export async function savePanelEvaluation(
   return { id: evaluation.id }
 }
 
+// ─── convertToPortfolio (US3) ────────────────────────────────
+
+export async function convertToPortfolio(
+  candidateId: string
+): Promise<{ portfolioStartupId?: string; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { data: candidate } = await supabase
+    .from('startup_candidates')
+    .select('*')
+    .eq('id', candidateId)
+    .single()
+
+  if (!candidate) return { error: 'Candidata não encontrada.' }
+  if (candidate.result !== 'Ganha') {
+    return { error: 'Somente candidatas com resultado "Ganha" podem ser convertidas.' }
+  }
+  if (candidate.converted_portfolio_startup_id) {
+    return { error: 'Candidata já foi convertida em startup de portfólio.' }
+  }
+
+  const { data: portfolio, error: portfolioError } = await supabase
+    .from('portfolio_startups')
+    .insert({
+      name: candidate.name,
+      site: candidate.site ?? null,
+      vertical: candidate.vertical ?? null,
+      stage: candidate.phase ?? null,
+      short_description: candidate.general_note ?? null,
+      captable_summary: candidate.captable ?? null,
+      source_candidate_id: candidateId,
+      founders: [] as unknown as Json,
+      entry_date: new Date().toISOString().split('T')[0],
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select('id')
+    .single()
+
+  if (portfolioError || !portfolio) {
+    return { error: portfolioError?.message ?? 'Erro ao criar startup no portfólio.' }
+  }
+
+  const { error: updateError } = await supabase
+    .from('startup_candidates')
+    .update({
+      converted_portfolio_startup_id: portfolio.id,
+      updated_at: new Date().toISOString(),
+      updated_by: user.id,
+    })
+    .eq('id', candidateId)
+
+  if (updateError) {
+    await supabase.from('portfolio_startups').delete().eq('id', portfolio.id)
+    return { error: updateError.message }
+  }
+
+  return { portfolioStartupId: portfolio.id }
+}
+
 // ─── updatePanelEvaluation ────────────────────────────────────
 
 export async function updatePanelEvaluation(

@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { QualitativeAssessmentForm } from '@/components/crm/QualitativeAssessmentForm'
 import { PanelEvaluationConsolidation } from '@/components/crm/PanelEvaluationConsolidation'
 import { ActivityTimeline } from '@/components/crm/ActivityTimeline'
 import { CandidateStageResultEditor } from '@/components/crm/CandidateStageResultEditor'
+import { ConvertToPortfolioDialog } from '@/components/crm/ConvertToPortfolioDialog'
 import { buildWhatsAppUrl } from '@/lib/utils/whatsapp'
 
 interface Props {
@@ -67,9 +69,9 @@ export default async function CandidataPage({ params }: Props) {
         <div className="flex items-start justify-between gap-4 mb-3">
           <div>
             <div className="flex items-center gap-2 mb-1 text-xs text-text-muted">
-              <a href="/crm" className="hover:text-primary transition-colors">CRM</a>
+              <Link href="/crm" className="hover:text-primary transition-colors">CRM</Link>
               <span>›</span>
-              <a href={`/crm/${funnelId}`} className="hover:text-primary transition-colors">{funnel.name}</a>
+              <Link href={`/crm/${funnelId}`} className="hover:text-primary transition-colors">{funnel.name}</Link>
               <span>›</span>
               <span className="text-text-secondary">{candidate.name}</span>
             </div>
@@ -299,11 +301,19 @@ export default async function CandidataPage({ params }: Props) {
               </div>
             )}
 
-            {/* Conversão para portfólio — implementação em T036-T038 (US3) */}
+            {/* US3 — Converter em Portfólio */}
             {!candidate.converted_portfolio_startup_id && candidate.result === 'Ganha' && (
-              <div className="text-xs text-accent border border-accent/30 bg-accent/5 p-2 text-center">
-                Startup &quot;Ganha&quot; — conversão para portfólio disponível em breve (US3).
-              </div>
+              <ConvertToPortfolioDialog
+                candidateId={candidateId}
+                candidateName={candidate.name}
+                previewData={{
+                  site: candidate.site,
+                  vertical: candidate.vertical,
+                  phase: candidate.phase,
+                  captable: candidate.captable,
+                  general_note: candidate.general_note,
+                }}
+              />
             )}
 
             {candidate.converted_portfolio_startup_id && (

@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import {
   createPanelEvaluationForm,
-  updatePanelEvaluationForm,
   duplicatePanelEvaluationForm,
 } from '@/lib/actions/funnels'
 import type { Database } from '@/types/supabase'
@@ -32,7 +31,7 @@ const TYPE_OPTIONS = [
 
 function CriterionRow({
   criterion,
-  index,
+  index: _index,
   onChange,
   onRemove,
 }: {

@@ -6,7 +6,6 @@ import { CandidateCard, type CandidateRow } from '@/components/crm/CandidateCard
 import { StageManager } from '@/components/crm/StageManager'
 import { PanelEvaluationFormConfig } from '@/components/crm/PanelEvaluationFormConfig'
 import { NewCandidateModal } from '@/components/crm/NewCandidateModal'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import type { Database } from '@/types/supabase'
@@ -35,8 +34,8 @@ interface FunnelPageClientProps {
 
 export function FunnelPageClient({
   funnelId,
-  funnelName,
-  funnelStatus,
+  funnelName: _funnelName,
+  funnelStatus: _funnelStatus,
   stages,
   candidates: initialCandidates,
   panelForms,

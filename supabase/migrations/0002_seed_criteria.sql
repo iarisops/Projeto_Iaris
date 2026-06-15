@@ -1,0 +1,373 @@
+-- IARIS Portfolio OS — Assessment Criteria Seed
+-- T009: 38 criteria from Assessment-Evolucao-Startups-Iaris-v2.xlsm, tab Criterios-v2
+-- 6 categories: Estratégia (6), Produto (6), Distribuição (7), Mercado (6), Operação (6), Founder (7)
+
+INSERT INTO public.assessment_criteria
+  (category, criterion, what_to_observe, red_description, orange_description, yellow_description, green_description, suggested_evidence)
+VALUES
+
+-- ============================================================
+-- Estratégia (6 critérios)
+-- ============================================================
+(
+  'Estratégia', 'Clareza de ICP',
+  'Nível de definição do público prioritário, decisor, usuário, caso de uso e recorte inicial.',
+  'ICP genérico, múltiplos públicos sem escolha clara ou vendas oportunísticas fora de foco.',
+  'Há hipótese de ICP, mas ainda ampla, pouco priorizada ou sem evidências suficientes.',
+  'ICP prioritário parcialmente definido, com sinais iniciais de aderência e aprendizados em andamento.',
+  'ICP claro e defendido por evidências de conversão, uso, pagamento ou entrevistas consistentes.',
+  'Clientes atuais, pipeline, win/loss, entrevistas, segmentos com maior conversão.'
+),
+(
+  'Estratégia', 'Dor validada',
+  'Força, urgência e recorrência da dor para o ICP escolhido.',
+  'Dor assumida pelo founder; clientes não reconhecem urgência, impacto ou prioridade de compra.',
+  'Dor aparece no discurso, mas urgência, orçamento ou frequência ainda são pouco comprovados.',
+  'Clientes reconhecem a dor e aceitam testar ou pagar; validação ainda inicial.',
+  'Dor recorrente, urgente e com impacto claro, repetida em múltiplos clientes do ICP.',
+  'Entrevistas, motivos de compra, tickets, velocidade de decisão, casos de uso.'
+),
+(
+  'Estratégia', 'Proposta de valor',
+  'Clareza do ganho prometido e conexão com a dor, alternativa atual e resultado esperado.',
+  'Benefício genérico ou muito baseado em funcionalidades; não fica claro por que comprar agora.',
+  'Proposta faz sentido, mas ainda é pouco específica, pouco mensurável ou dependente da explicação do founder.',
+  'Valor percebido por clientes iniciais, mas narrativa e prova de valor ainda precisam ser refinadas.',
+  'Valor claro, relevante e mensurável, entendido pelo ICP e comparável às alternativas.',
+  'Pitch, materiais comerciais, feedback de clientes, objeções, ROI ou economia gerada.'
+),
+(
+  'Estratégia', 'Narrativa consistente',
+  'Capacidade de explicar problema, solução, diferencial e chamada para ação de forma simples e repetível.',
+  'Pitch confuso, muda muito ou depende totalmente da improvisação do founder.',
+  'Narrativa existe, mas ainda é complexa, desalinhada do ICP ou pouco objetiva.',
+  'Pitch compreensível e parcialmente replicável, com ajustes necessários de foco e simplicidade.',
+  'Narrativa simples, consistente entre materiais, reuniões e canais, podendo ser replicada por terceiros.',
+  'Deck, site, proposta comercial, gravações de pitch, respostas a objeções.'
+),
+(
+  'Estratégia', 'Mercado relevante',
+  'Tamanho, acessibilidade e atratividade do mercado inicial e da tese de expansão.',
+  'Mercado pequeno, inacessível, sem disposição de pagamento ou com captura muito limitada.',
+  'Mercado parece relevante, mas o recorte inicial, tese de entrada ou captura ainda são frágeis.',
+  'Mercado existe e o recorte inicial é coerente, embora ainda haja dúvidas sobre tamanho ou acesso.',
+  'Mercado relevante, acessível e com caminho claro de nicho inicial para expansão.',
+  'TAM/SAM/SOM, concorrentes, volume de clientes, benchmarks, tese de expansão.'
+),
+(
+  'Estratégia', 'Timing de mercado',
+  'Momento de adoção: regulação, tecnologia, orçamento, comportamento e maturidade do comprador.',
+  'Timing desfavorável; mercado imaturo, saturado ou sem janela clara de adoção.',
+  'Sinais ambíguos; depende de educação intensa, mudança externa ou timing ainda incerto.',
+  'Timing favorável com sinais iniciais, mas ainda exige maturação ou prova adicional.',
+  'Janela clara de adoção, com tendência, regulação, orçamento ou comportamento favorecendo a solução.',
+  'Mudanças regulatórias, tendências, orçamento, urgência, concorrência, eventos do setor.'
+),
+
+-- ============================================================
+-- Produto (6 critérios)
+-- ============================================================
+(
+  'Produto', 'MVP funcional',
+  'Existência de produto capaz de entregar a promessa mínima de valor.',
+  'Produto inexistente ou incapaz de resolver a dor mínima sem esforço excepcional.',
+  'MVP existe, mas é instável, manual demais ou ainda não entrega valor de forma confiável.',
+  'MVP funcional para casos iniciais, com limitações conhecidas e evolução em andamento.',
+  'Produto funcional e usável, entregando o valor central de forma consistente.',
+  'Demos, uso real, bugs críticos, esforço manual, entregas realizadas, clientes ativos.'
+),
+(
+  'Produto', 'Uso recorrente',
+  'Frequência e continuidade de uso por usuários ou clientes-alvo.',
+  'Clientes não usam, usam apenas uma vez ou uso depende de esforço pontual da startup.',
+  'Uso ocasional ou baixo, ainda sem comprovar hábito, necessidade recorrente ou encaixe operacional.',
+  'Alguns usuários/clientes usam de forma recorrente, mas sem padrão amplo ou previsível.',
+  'Uso recorrente por clientes do ICP, com frequência coerente à dor resolvida.',
+  'Logs de uso, MAU/WAU/DAU quando fizer sentido, reuniões de acompanhamento, tickets de suporte.'
+),
+(
+  'Produto', 'Retenção inicial',
+  'Capacidade de manter clientes/usuários ativos após o primeiro uso, piloto ou contrato.',
+  'Abandono, churn, descontinuidade ou ausência de clientes ativos relevantes.',
+  'Retenção incerta pela base pequena, uso frágil ou necessidade de esforço excessivo para manter cliente.',
+  'Primeiros clientes permanecem, renovam ou continuam usando, mas a base ainda é pequena.',
+  'Retenção consistente para o estágio, com motivos claros para permanência e continuidade.',
+  'Renovações, contratos ativos, churn, continuidade de uso, expansão, entrevistas de retenção.'
+),
+(
+  'Produto', 'Feedback positivo',
+  'Qualidade do retorno de clientes sobre utilidade, valor e experiência.',
+  'Feedback negativo, indiferente, inexistente ou focado em problemas críticos.',
+  'Feedback positivo genérico, sem comportamento concreto como uso, pagamento, renovação ou indicação.',
+  'Feedback positivo de clientes-alvo, com sugestões claras de melhoria e percepção de valor.',
+  'Feedback positivo forte e espontâneo, vinculado a valor percebido, adoção ou recomendação.',
+  'Depoimentos, NPS qualitativo, mensagens de clientes, entrevistas, cases, indicações.'
+),
+(
+  'Produto', 'Evolução do produto',
+  'Ritmo e foco da melhoria do produto a partir de hipóteses, feedbacks e prioridades.',
+  'Produto parado, lento ou com backlog sem prioridade; problemas conhecidos sem resposta.',
+  'Produto evolui, mas de forma reativa, dispersa ou pouco conectada aos riscos principais.',
+  'Roadmap com prioridades e entregas recentes relevantes para validação ou entrega de valor.',
+  'Evolução rápida, orientada por dados/feedback e capaz de reduzir riscos relevantes do negócio.',
+  'Roadmap, changelog, entregas do ciclo, bugs resolvidos, priorização, feedback incorporado.'
+),
+(
+  'Produto', 'Diferenciação percebida',
+  'Percepção do cliente sobre o que torna a solução distinta e preferível às alternativas.',
+  'Solução percebida como commodity, substituível ou igual às alternativas existentes.',
+  'Diferenciação existe no discurso, mas clientes ainda não percebem claramente ou não pagam por ela.',
+  'Diferenciação percebida por alguns clientes ou casos, mas ainda pouco defensável ou pouco comunicada.',
+  'Diferenciação clara, valorizada pelo ICP e difícil de replicar no curto prazo.',
+  'Comparativos, objeções, concorrentes citados, motivo de escolha, diferenciais valorizados.'
+),
+
+-- ============================================================
+-- Distribuição (7 critérios)
+-- ============================================================
+(
+  'Distribuição', 'Founder vende sozinho',
+  'Capacidade do founder de conduzir vendas, aprender com o cliente e gerar pipeline inicial.',
+  'Founder não vende, evita contato com clientes ou terceiriza vendas antes de aprender o processo.',
+  'Founder vende pontualmente, sem cadência, sem disciplina ou dependendo de relacionamento pessoal.',
+  'Founder vende parcialmente e aprende com o funil, mas ainda centraliza ou oscila na execução.',
+  'Founder lidera vendas com disciplina e já transforma aprendizados em processo replicável.',
+  'Reuniões comerciais, pipeline, follow-ups, taxa de resposta, aprendizados de venda, CRM.'
+),
+(
+  'Distribuição', 'Pitch replicável',
+  'Existência de abordagem comercial que possa ser repetida com consistência.',
+  'Abordagem muda sempre, depende de improviso e não gera aprendizado comparável.',
+  'Pitch em refinamento, ainda confuso, muito customizado ou pouco conectado à dor do ICP.',
+  'Pitch compreensível e testado em alguns públicos, mas ainda não totalmente repetível.',
+  'Pitch replicável, com argumentos, provas, objeções e roteiro documentados.',
+  'Scripts, deck comercial, propostas, e-mails, objeções mapeadas, taxa de avanço.'
+),
+(
+  'Distribuição', 'Processo comercial',
+  'Organização mínima do funil, etapas, responsabilidades, follow-up e critérios de avanço.',
+  'Não há etapas, CRM, follow-up, rotina comercial ou critérios claros de avanço.',
+  'Há atividade comercial, mas sem disciplina, dados suficientes ou previsibilidade de próximos passos.',
+  'Processo básico funcionando, com etapas, cadência e acompanhamento de oportunidades.',
+  'Processo estruturado, medido e melhorado periodicamente, com previsibilidade inicial.',
+  'CRM, funil, etapas, taxa de conversão, reuniões de pipeline, propostas enviadas.'
+),
+(
+  'Distribuição', 'Canal validado',
+  'Capacidade de um canal gerar oportunidades qualificadas de forma minimamente repetível.',
+  'Nenhum canal gera leads qualificados ou aprendizados úteis.',
+  'Canais testados, mas ainda sem consistência, qualidade ou relação esforço-retorno clara.',
+  'Um ou mais canais mostram sinais iniciais de funcionar, ainda com volume limitado.',
+  'Canal principal validado, gerando leads qualificados com repetição e esforço/custo aceitável.',
+  'Origem de leads, experimentos, taxa de resposta, conversão por canal, custo/esforço.'
+),
+(
+  'Distribuição', 'Leads recorrentes',
+  'Regularidade e qualidade da geração de oportunidades comerciais.',
+  'Pipeline vazio ou dependente de indicações/eventos isolados sem continuidade.',
+  'Leads aparecem de forma irregular, pouco qualificada ou sem padrão de origem.',
+  'Leads moderados e recorrentes, mas volume ainda limitado para sustentar crescimento.',
+  'Fluxo recorrente de leads qualificados, compatível com o estágio e metas comerciais.',
+  'Pipeline, cadência de prospecção, inbound, parceiros, eventos, taxa de qualificação.'
+),
+(
+  'Distribuição', 'CAC percebido saudável',
+  'Relação entre esforço/custo de aquisição, ticket, margem, ciclo e potencial de LTV.',
+  'Custo ou esforço de venda incompatível com ticket, margem ou capacidade operacional.',
+  'CAC/esforço ainda incerto; ciclo longo, customização ou baixa conversão geram preocupação.',
+  'CAC ainda não consolidado, mas esforço parece viável para ticket, margem e LTV esperado.',
+  'Relação CAC/ticket/LTV indica viabilidade comercial e potencial de escala.',
+  'Tempo do founder, ciclo de venda, custos de mídia/eventos, ticket, margem, LTV estimado.'
+),
+(
+  'Distribuição', 'Conversão inicial',
+  'Capacidade de transformar oportunidades em pilotos, propostas aceitas ou clientes.',
+  'Conversão muito baixa, estagnada ou sem aprendizado claro sobre perdas.',
+  'Conversão pontual, sem padrão ou muito dependente do founder e de relações específicas.',
+  'Conversão moderada em nicho/ICP, com gargalos e objeções mapeados.',
+  'Conversão consistente no ICP, com drivers de ganho e perda conhecidos.',
+  'Taxa por etapa, win/loss, propostas, pilotos, motivos de perda, tempo de ciclo.'
+),
+
+-- ============================================================
+-- Mercado (6 critérios)
+-- ============================================================
+(
+  'Mercado', 'Cliente pagante',
+  'Existência, perfil e qualidade dos clientes que já pagam pela solução.',
+  'Sem cliente pagante relevante, cliente fora do ICP ou apenas piloto gratuito sem aprendizado claro.',
+  'Primeiro pagante ou piloto pago existe, mas ainda é caso isolado ou pouco representativo.',
+  'Alguns clientes pagantes ou pilotos pagos no ICP, ainda com base pequena.',
+  'Base crescente de clientes pagantes no ICP, com evidência de valor e continuidade.',
+  'Contratos, notas, MRR/receita, perfil dos clientes, ICP, ticket, pilotos pagos.'
+),
+(
+  'Mercado', 'Receita recorrente',
+  'Previsibilidade e repetição da receita gerada pela solução.',
+  'Sem receita, receita pontual ou modelo sem recorrência clara.',
+  'Receita inicial existe, mas é imprevisível, eventual ou dependente de projetos avulsos.',
+  'Recorrência inicial ou contratos em formação, ainda com baixa previsibilidade.',
+  'Receita recorrente ou previsível para o estágio, com tendência de continuidade.',
+  'MRR/ARR, contratos, mensalidades, renovações, receitas por cliente, carteira ativa.'
+),
+(
+  'Mercado', 'Recompra',
+  'Sinais de renovação, continuidade, upsell, cross-sell ou expansão no cliente.',
+  'Clientes não recompram, não renovam ou não expandem após o primeiro ciclo.',
+  'Recompra incerta, eventual ou ainda sem tempo suficiente para comprovar.',
+  'Alguns sinais de renovação, upsell, continuidade ou expansão.',
+  'Recompra, renovação ou expansão frequente para o estágio.',
+  'Renovações, expansão de contrato, upsell, recompra, uso continuado, novos pedidos.'
+),
+(
+  'Mercado', 'Ticket percebido saudável',
+  'Adequação do preço ao valor entregue, margem, ciclo de venda e segmento-alvo.',
+  'Ticket baixo demais para sustentar operação, aquisição ou complexidade de entrega.',
+  'Ticket em teste; margem, ciclo ou customização deixam dúvidas sobre viabilidade.',
+  'Ticket com potencial, mas ainda precisa refinamento, segmentação ou prova de disposição de pagamento.',
+  'Ticket coerente com valor, margem, ciclo, esforço comercial e ICP.',
+  'Preço, margem, ciclo de venda, desconto, comparação com alternativas, disposição de pagamento.'
+),
+(
+  'Mercado', 'Indicação espontânea',
+  'Capacidade de clientes ou parceiros indicarem a solução sem estímulo forte da startup.',
+  'Sem indicação ou dependência exclusiva do networking pessoal do founder.',
+  'Indicações pontuais, pouco qualificadas ou provocadas diretamente pela startup.',
+  'Algumas indicações espontâneas relevantes, ainda sem padrão recorrente.',
+  'Indicações recorrentes e qualificadas, sinalizando satisfação e valor percebido.',
+  'Origem de leads, referrals, mensagens de clientes, parceiros, convites, recomendações.'
+),
+(
+  'Mercado', 'Sinais de PMF',
+  'Conjunto de evidências de aderência: dor forte, pagamento, uso, retenção, recomendação e crescimento.',
+  'Sem evidências consistentes: dor fraca, baixo uso, baixa disposição de pagamento ou pouca retenção.',
+  'Sinais ambíguos ou concentrados em poucos casos isolados, sem repetição suficiente.',
+  'Sinais iniciais de PMF, mas ainda não robustos, previsíveis ou replicáveis.',
+  'Evidências consistentes de PMF inicial: uso, retenção, pagamento, recomendação e crescimento.',
+  'Uso, retenção, expansão, NPS qualitativo, vendas, conversão, crescimento orgânico.'
+),
+
+-- ============================================================
+-- Operação (6 critérios)
+-- ============================================================
+(
+  'Operação', 'OKRs ativos',
+  'Existência e acompanhamento de objetivos/prioridades mensuráveis no ciclo.',
+  'Não há metas, OKRs ou prioridades acompanhadas; execução fica dispersa.',
+  'Metas existem, mas estão desconectadas da rotina, sem dono ou sem revisão consistente.',
+  'OKRs/prioridades definidos e revisados parcialmente, com disciplina ainda em amadurecimento.',
+  'OKRs ativos, mensuráveis e acompanhados com disciplina, gerando decisão e foco.',
+  'OKRs, rituais, indicadores, responsáveis, atas, tarefas, evolução do ciclo.'
+),
+(
+  'Operação', 'Cadência semanal',
+  'Regularidade da rotina de execução, acompanhamento e comunicação com a Iaris/time.',
+  'Sem rotina de acompanhamento, gaps de comunicação ou longos períodos sem atualização.',
+  'Rotina irregular, com atrasos, baixa preparação ou pouca continuidade dos combinados.',
+  'Cadência semanal/quinzenal existe com boa participação, mas ainda pode ser mais objetiva.',
+  'Cadência consistente, objetiva, com decisões claras e follow-ups cumpridos.',
+  'Reuniões, check-ins, status semanal, atualizações, cumprimento de combinados.'
+),
+(
+  'Operação', 'Prioridades claras',
+  'Capacidade de escolher poucas frentes críticas e manter foco nelas.',
+  'Muitas frentes simultâneas, sem foco no que reduz risco ou gera avanço real.',
+  'Prioridades existem, mas mudam muito, são amplas ou não atacam gargalos críticos.',
+  'Prioridades claras para o ciclo, com algum trade-off e foco razoável.',
+  'Foco forte nas hipóteses/entregas críticas e boa capacidade de dizer não.',
+  'Plano 30/60/90, backlog, OKRs, rituais, decisões de trade-off, foco do founder.'
+),
+(
+  'Operação', 'Organização operacional',
+  'Nível de documentação, gestão de tarefas, processos e continuidade das informações.',
+  'Informações/processos dispersos e dependência total da memória do founder.',
+  'Organização inicial, informal e frágil; ainda difícil para terceiros acompanharem contexto.',
+  'Organização básica de tarefas, documentos e indicadores, com lacunas manejáveis.',
+  'Operação documentada o suficiente para continuidade, governança e redução de dependência.',
+  'Drive/Notion/CRM, atas, tarefas, indicadores, processos, responsáveis, histórico.'
+),
+(
+  'Operação', 'Velocidade de execução',
+  'Ritmo de entrega dos combinados e capacidade de avançar nas prioridades.',
+  'Baixa execução; combinados não avançam ou ficam parados por ciclos consecutivos.',
+  'Execução acontece, mas é inconsistente, reativa ou sem impacto nos gargalos principais.',
+  'Boa velocidade em prioridades selecionadas, com alguns atrasos ou dependências.',
+  'Execução rápida, consistente e conectada às prioridades críticas do ciclo.',
+  'Entregas do ciclo, tarefas concluídas, velocidade de experimentos, atrasos, desbloqueios.'
+),
+(
+  'Operação', 'Capacidade analítica',
+  'Qualidade da leitura de dados, aprendizados e tomada de decisão.',
+  'Decisões baseadas apenas em intuição; ausência de dados, métricas ou aprendizados estruturados.',
+  'Dados existem, mas são pouco usados ou não viram decisão/priorização.',
+  'Usa dados e feedback para algumas decisões, ainda sem consistência plena.',
+  'Mede, interpreta, aprende e ajusta rota com clareza e velocidade.',
+  'Métricas, análises, experimentos, hipóteses, aprendizados, decisões tomadas.'
+),
+
+-- ============================================================
+-- Founder (7 critérios)
+-- ============================================================
+(
+  'Founder', 'Capacidade comercial',
+  'Habilidade do founder em vender, ouvir mercado e conduzir negociação.',
+  'Founder evita vendas, terceiriza cedo demais ou não entende cliente/objeções.',
+  'Founder vende pouco, sem cadência ou muito dependente de relacionamento pontual.',
+  'Founder conduz vendas e aprende com clientes, mas ainda precisa evoluir técnica ou consistência.',
+  'Founder tem forte capacidade comercial, domina dor, objeções, negociação e follow-up.',
+  'Reuniões, pipeline, taxa de avanço, objeções, comunicação com clientes, propostas.'
+),
+(
+  'Founder', 'Adaptabilidade',
+  'Capacidade de ajustar rota a partir de evidências, feedbacks e mudanças de contexto.',
+  'Founder rígido, defensivo ou demora a mudar mesmo diante de evidências.',
+  'Aceita feedback, mas muda devagar, de forma seletiva ou sem consistência.',
+  'Ajusta rota com algum aprendizado, ainda com pontos de resistência ou lentidão.',
+  'Adapta rápido com base em evidências, mantendo foco estratégico e disciplina.',
+  'Mudanças de tese, ajustes de produto/GTM, postura em mentoria, reação a feedbacks.'
+),
+(
+  'Founder', 'Resiliência',
+  'Capacidade de sustentar energia e execução diante de fricção, incerteza e rejeição.',
+  'Desengaja diante de dificuldade, perde ritmo ou abandona prioridades críticas.',
+  'Oscila muito e depende de tração externa para manter ritmo.',
+  'Mantém energia razoável, com momentos de oscilação controláveis.',
+  'Sustenta ritmo, pressão e aprendizado mesmo com fricção e resultados incertos.',
+  'Cumprimento de combinados, reação a perdas, constância, retomada após obstáculos.'
+),
+(
+  'Founder', 'Comunicação',
+  'Clareza, transparência e frequência da comunicação com time, clientes e Iaris.',
+  'Comunicação confusa, ausente, pouco transparente ou sem atualização relevante.',
+  'Comunica, mas com pouca objetividade, baixa frequência ou informações incompletas.',
+  'Boa comunicação, ainda com necessidade de mais estrutura, síntese ou cadência.',
+  'Comunicação clara, frequente, objetiva e transparente, facilitando governança e apoio.',
+  'Status, reuniões, respostas, sínteses, clareza de pedidos, transparência sobre riscos.'
+),
+(
+  'Founder', 'Liderança',
+  'Capacidade de mobilizar pessoas, alinhar direção e criar responsabilização.',
+  'Não mobiliza time/parceiros ou centraliza de forma improdutiva e desorganizada.',
+  'Liderança em formação, com dependência alta do founder e pouca distribuição de responsabilidades.',
+  'Lidera prioridades e mobiliza o mínimo necessário, ainda com lacunas de gestão.',
+  'Boa liderança, com clareza de direção, alinhamento, responsabilização e evolução do time.',
+  'Time, rituais, delegação, contratação, parceiros, alinhamento de prioridades, cultura.'
+),
+(
+  'Founder', 'Capacidade de priorização',
+  'Disciplina para escolher alavancas críticas e evitar dispersão.',
+  'Dispersão alta, muitos projetos ou negócios paralelos impedindo avanço da startup.',
+  'Tenta priorizar, mas cede a urgências, oportunidades paralelas ou baixa clareza de foco.',
+  'Prioriza razoavelmente, com necessidade de mais disciplina e trade-offs explícitos.',
+  'Prioriza bem, faz trade-offs e concentra energia nas alavancas que reduzem risco.',
+  'Agenda, plano de ação, decisões de foco, tarefas concluídas, frentes abandonadas.'
+),
+(
+  'Founder', 'Execução consistente',
+  'Constância de atuação, dedicação e cumprimento de combinados.',
+  'Founder não atua na startup ou tem outras prioridades impeditivas para execução.',
+  'Atua, mas com cadência baixa/inconsistente e risco claro de dedicação.',
+  'Boa execução parcial, com domínio do assunto, mas inconsistência em algumas frentes.',
+  'Dedicação e execução consistentes, combinados cumpridos e protagonismo real do founder.',
+  'Entregas, presença em rituais, avanço semanal, dedicação, respostas, ownership.'
+);

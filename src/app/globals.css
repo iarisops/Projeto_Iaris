@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* ─── IARIS Design System — Tailwind 4 CSS-first config ─── */
+@theme {
+  /* Brand colours */
+  --color-deep-navy:          #000033;
+  --color-vibrant-teal:       #009999;
+  --color-innovation-amber:   #fbb33d;
+  --color-slate-blue:         #303f59;
+  --color-marker-blue:        #6787bf;
+
+  /* Semantic aliases */
+  --color-background:         var(--color-deep-navy);
+  --color-surface:            #0a0f2e;   /* slightly lifted from deep navy */
+  --color-surface-2:          #111840;   /* second elevation */
+  --color-border:             var(--color-slate-blue);
+  --color-border-subtle:      #1e2a40;
+  --color-primary:            var(--color-vibrant-teal);
+  --color-accent:             var(--color-innovation-amber);
+
+  /* Text */
+  --color-text-primary:       #f0f4ff;
+  --color-text-secondary:     #8fa3c8;
+  --color-text-muted:         #4a5f80;
+
+  /* Signal colours (assessment) */
+  --color-signal-red:         #e53e3e;
+  --color-signal-orange:      #dd6b20;
+  --color-signal-yellow:      #d69e2e;
+  --color-signal-green:       #38a169;
+
+  /* Typography */
+  --font-headline: var(--font-hanken), "Hanken Grotesk", sans-serif;
+  --font-body:     var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  --font-label:    var(--font-geist), "Geist", monospace;
+
+  /* Spacing / grid */
+  --spacing-grid: 30px;
+
+  /* Border radius — IARIS uses 0px radius on primary buttons */
+  --radius-none: 0px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+}
+
+/* ─── Base ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Technical marker grid background pattern (30px) */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--color-slate-blue) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-slate-blue) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: 0 0;
+}
+
+/* Tonal depth layers — no box-shadow allowed */
+.surface   { background-color: var(--color-surface); }
+.surface-2 { background-color: var(--color-surface-2); }
+
+/* MDX / Wiki prose styles */
+.prose-iaris h1 {
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+.prose-iaris h2 {
+  font-family: var(--font-headline);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.prose-iaris h3 {
+  font-family: var(--font-headline);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.prose-iaris p {
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 0.75rem;
+}
+.prose-iaris ul, .prose-iaris ol {
+  color: var(--color-text-secondary);
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.prose-iaris li { margin-bottom: 0.25rem; }
+.prose-iaris strong { color: var(--color-text-primary); font-weight: 600; }
+.prose-iaris a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-iaris a:hover { opacity: 0.8; }
+.prose-iaris hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
+}
+.prose-iaris table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+.prose-iaris th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+}
+.prose-iaris td {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.prose-iaris tr:last-child td { border-bottom: none; }
+.prose-iaris code {
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  background-color: var(--color-surface-2);
+  padding: 0.125rem 0.375rem;
+  color: var(--color-accent);
+}

@@ -1,0 +1,16 @@
+{
+  "name": "iaris-context-worker",
+  "version": "1.0.0",
+  "description": "Async Ollama context generation worker for IARIS Portfolio OS",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.50.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { FunnelPageClient } from '@/components/crm/FunnelPageClient'
@@ -69,9 +70,9 @@ export default async function FunnelPage({ params }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <a href="/crm" className="text-xs text-text-muted hover:text-primary transition-colors">
+              <Link href="/crm" className="text-xs text-text-muted hover:text-primary transition-colors">
                 CRM
-              </a>
+              </Link>
               <span className="text-text-muted text-xs">›</span>
               <span className="text-xs text-text-secondary">{funnel.name}</span>
             </div>
@@ -82,12 +83,12 @@ export default async function FunnelPage({ params }: Props) {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <Badge variant={statusBadgeVariant as 'teal' | 'amber' | 'muted'}>{funnel.status}</Badge>
-            <a
+            <Link
               href={`/crm/${funnelId}/metricas`}
               className="text-xs text-text-muted hover:text-primary transition-colors font-label uppercase tracking-wide"
             >
               Ver métricas →
-            </a>
+            </Link>
           </div>
         </div>
 

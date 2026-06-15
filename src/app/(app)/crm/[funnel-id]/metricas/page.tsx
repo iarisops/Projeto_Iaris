@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 interface Props {
@@ -62,9 +63,9 @@ export default async function FunnelMetricsPage({ params }: Props) {
     <div className="flex flex-col gap-0">
       <div className="px-6 pt-6 pb-4 border-b border-border">
         <div className="flex items-center gap-2 mb-1 text-xs text-text-muted">
-          <a href="/crm" className="hover:text-primary transition-colors">CRM</a>
+          <Link href="/crm" className="hover:text-primary transition-colors">CRM</Link>
           <span>›</span>
-          <a href={`/crm/${funnelId}`} className="hover:text-primary transition-colors">{funnel.name}</a>
+          <Link href={`/crm/${funnelId}`} className="hover:text-primary transition-colors">{funnel.name}</Link>
           <span>›</span>
           <span className="text-text-secondary">Métricas</span>
         </div>

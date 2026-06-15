@@ -61,8 +61,6 @@ export function CandidateStageResultEditor({
     setSavingResult(false)
   }
 
-  const currentStageName = activeStages.find((s) => s.id === stageId)?.name
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -92,7 +90,7 @@ export function CandidateStageResultEditor({
 
       <p className="text-xs text-text-muted bg-surface-2 border border-border p-2">
         Etapa e resultado são <strong>independentes</strong>. Um startup pode ter resultado
-        "Ganha" ou "Perdida" em qualquer etapa do funil.
+        &quot;Ganha&quot; ou &quot;Perdida&quot; em qualquer etapa do funil.
       </p>
     </div>
   )

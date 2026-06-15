@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { FunnelListClient } from '@/components/crm/FunnelListClient'
@@ -68,13 +69,13 @@ export default async function CRMPage() {
       {funnels.length === 0 && (
         <div className="bg-surface-2 border border-border p-12 text-center">
           <p className="text-text-muted text-sm">Nenhum funil cadastrado ainda.</p>
-          <p className="text-text-muted text-xs mt-1">Clique em "Novo funil" para começar.</p>
+          <p className="text-text-muted text-xs mt-1">Clique em &quot;Novo funil&quot; para começar.</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {funnels.map((funnel) => (
-          <a
+          <Link
             key={funnel.id}
             href={`/crm/${funnel.id}`}
             className="bg-surface-2 border border-border p-5 flex flex-col gap-3 hover:border-primary/60 transition-colors"
@@ -135,7 +136,7 @@ export default async function CRMPage() {
                 )}
               </div>
             )}
-          </a>
+          </Link>
         ))}
       </div>
     </div>
