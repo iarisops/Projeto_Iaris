@@ -42,9 +42,10 @@ const RECOMMENDATION_OPTIONS = [
 interface QualitativeAssessmentFormProps {
   candidateId: string
   initial?: Assessment | null
+  onSaved?: () => void
 }
 
-export function QualitativeAssessmentForm({ candidateId, initial }: QualitativeAssessmentFormProps) {
+export function QualitativeAssessmentForm({ candidateId, initial, onSaved }: QualitativeAssessmentFormProps) {
   const initialSignals = (initial?.criteria_signals as Record<string, string>) ?? {}
 
   const [signals, setSignals] = useState<Record<string, Signal>>(
@@ -84,6 +85,7 @@ export function QualitativeAssessmentForm({ candidateId, initial }: QualitativeA
       setError(res.error)
     } else {
       setSaved(true)
+      onSaved?.()
     }
   }
 

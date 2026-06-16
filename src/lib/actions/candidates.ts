@@ -40,6 +40,7 @@ const ActivityCreateSchema = z.object({
   startup_candidate_id: z.string().uuid(),
   type: z.string().min(1),
   date: z.string(),
+  title: z.string().optional(),
   responsible_id: z.string().uuid().optional(),
   status: z
     .enum(['Pendente', 'Agendada', 'Concluída', 'Reagendada', 'Cancelada'])

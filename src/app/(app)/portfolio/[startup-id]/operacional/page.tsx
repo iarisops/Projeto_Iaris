@@ -149,6 +149,22 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
       .maybeSingle(),
   ])
 
+  // Fetch CRM activities from any candidate converted to this portfolio startup
+  const { data: linkedCandidates } = await supabase
+    .from('startup_candidates')
+    .select('id')
+    .eq('converted_portfolio_startup_id', startupId)
+
+  const candidateIds = (linkedCandidates ?? []).map((c) => c.id)
+  const { data: crmActivities } = candidateIds.length > 0
+    ? await supabase
+        .from('crm_activities')
+        .select('id, startup_candidate_id, type, date, title, status, note, external_link, responsible_id, created_at')
+        .in('startup_candidate_id', candidateIds)
+        .order('date', { ascending: false })
+        .limit(100)
+    : { data: [] }
+
   // Fetch assessment items sequentially (needs assessmentId)
   const assessmentId = assessmentRow?.id ?? null
   let resolvedItems: AssessmentItem[] = []
@@ -293,6 +309,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           <PortfolioActivitiesSection
             startupId={startupId}
             activities={(activities ?? []) as Parameters<typeof PortfolioActivitiesSection>[0]['activities']}
+            crmActivities={(crmActivities ?? []) as Parameters<typeof PortfolioActivitiesSection>[0]['crmActivities']}
           />
         </section>
 

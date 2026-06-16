@@ -39,10 +39,13 @@ export default async function AppShell({ children }: { children: ReactNode }) {
         {/* Navigation */}
         <nav className="flex-1 px-2 py-4 flex flex-col gap-1 overflow-y-auto">
           <NavLink href="/" exact>
-            Portfólio
+            Home
           </NavLink>
           <NavLink href="/crm">
             CRM
+          </NavLink>
+          <NavLink href="/atividades">
+            Atividades
           </NavLink>
           <NavLink href="/meu-kanban">
             Meu Kanban

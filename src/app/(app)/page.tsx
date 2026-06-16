@@ -2,9 +2,30 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { currentQuarter } from '@/lib/utils/quarter'
+import { HomeTaskList } from '@/components/home/HomeTaskList'
+import { HomeActivityList } from '@/components/home/HomeActivityList'
+import type { UnifiedActivity } from '@/components/home/HomeActivityList'
+import { AddStartupButton } from '@/components/portfolio/AddStartupButton'
 
 const tierVariant = { 0: 'muted', 1: 'teal', 2: 'amber', 3: 'green' } as const
 
+// ── Helpers ───────────────────────────────────────────────────────
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')
+}
+
+function CalendarIcon() {
+  return (
+    <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -14,7 +35,8 @@ export default async function DashboardPage() {
   const [
     { data: startups },
     { data: myTasks },
-    { data: myActivities },
+    { data: myPortfolioActivities },
+    { data: myCrmActivities },
   ] = await Promise.all([
     supabase
       .from('portfolio_startups')
@@ -22,29 +44,61 @@ export default async function DashboardPage() {
       .order('name'),
     supabase
       .from('kanban_tasks')
-      .select('id, title, phase, due_date, quarter, startup_id')
+      .select('id, title, phase, due_date, quarter, startup_id, portfolio_startups(name)')
       .eq('responsible_id', user!.id)
       .neq('phase', 'Concluído')
       .order('due_date', { ascending: true, nullsFirst: false })
       .limit(20),
     supabase
       .from('portfolio_activities')
-      .select('id, type, date, status, startup_id, notes')
+      .select('id, type, date, status, startup_id, notes, portfolio_startups(name)')
       .eq('responsible_id', user!.id)
       .in('status', ['Pendente', 'Agendada', 'Reagendada'])
       .order('date', { ascending: true })
       .limit(20),
+    supabase
+      .from('crm_activities')
+      .select('id, type, date, title, status, note, startup_candidate_id, startup_candidates(funnel_id, name)')
+      .eq('responsible_id', user!.id)
+      .eq('status', 'Pendente')
+      .order('date', { ascending: true })
+      .limit(20),
   ])
+
+  const myActivities: UnifiedActivity[] = [
+    ...(myPortfolioActivities ?? []).map((a) => {
+      const ps = a.portfolio_startups as { name: string } | null
+      return {
+        source: 'portfolio' as const,
+        id: a.id, type: a.type, date: a.date, status: a.status,
+        title: a.notes,
+        context: ps?.name ?? null,
+        href: `/portfolio/${a.startup_id}/operacional`,
+      }
+    }),
+    ...(myCrmActivities ?? []).map((a) => {
+      const candidate = a.startup_candidates as { funnel_id: string; name: string } | null
+      return {
+        source: 'crm' as const,
+        id: a.id, type: a.type, date: a.date, status: a.status,
+        title: a.title ?? a.note,
+        context: candidate?.name ?? null,
+        href: candidate ? `/crm/${candidate.funnel_id}/candidatas/${a.startup_candidate_id}#activity-${a.id}` : '#',
+      }
+    }),
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   return (
     <div className="flex flex-col gap-8 p-6">
+
       {/* Portfolio grid */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="font-headline text-2xl font-bold text-text-primary">Portfólio</h1>
+            <h1 className="font-headline text-2xl font-bold text-text-primary">Home</h1>
             <p className="text-xs text-text-muted mt-0.5">{quarter}</p>
           </div>
+          <AddStartupButton />
         </div>
 
         {(!startups || startups.length === 0) ? (
@@ -73,7 +127,6 @@ export default async function DashboardPage() {
                       </span>
                     )}
                   </div>
-
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <p className="font-headline text-sm font-semibold text-text-primary leading-snug group-hover:text-primary transition-colors truncate">
                       {s.name}
@@ -82,7 +135,6 @@ export default async function DashboardPage() {
                       <p className="text-xs text-text-muted truncate">{s.vertical}</p>
                     )}
                   </div>
-
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant={tierVariant[tier]} className="text-[10px]">
                       {tier === 0 ? '—' : `T${tier}`}
@@ -102,86 +154,22 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Minhas Tarefas */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-headline text-sm font-semibold text-text-secondary uppercase tracking-wider">
-              Minhas Tarefas
-            </h2>
-            <a href="/meu-kanban" className="text-xs text-primary hover:underline">
+        <section className="flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 bg-surface border border-border border-b-0">
+            <h2 className="font-headline text-sm font-semibold text-text-primary">Minhas Tarefas</h2>
+            <a href="/meu-kanban" className="text-xs text-primary hover:underline font-label">
               Ver kanban →
             </a>
           </div>
-
-          {(!myTasks || myTasks.length === 0) ? (
-            <p className="text-sm text-text-muted py-4 border border-border text-center bg-surface-2">
-              Nenhuma tarefa pendente.
-            </p>
-          ) : (
-            <div className="flex flex-col divide-y divide-border border border-border">
-              {myTasks.map((task) => {
-                const overdue = !!task.due_date &&
-                  new Date(task.due_date) < new Date() &&
-                  task.phase !== 'Concluído'
-                return (
-                  <a
-                    key={task.id}
-                    href={`/portfolio/${task.startup_id}/operacional?quarter=${task.quarter}`}
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface-2 transition-colors"
-                  >
-                    <span className={[
-                      'w-1.5 h-1.5 rounded-full shrink-0',
-                      task.phase === 'Em andamento' ? 'bg-primary' :
-                      task.phase === 'Aguardando/Bloqueado' ? 'bg-signal-orange' :
-                      'bg-border',
-                    ].join(' ')} />
-                    <span className="flex-1 text-sm text-text-primary truncate">{task.title}</span>
-                    {task.due_date && (
-                      <span className={['text-xs shrink-0', overdue ? 'text-signal-red font-semibold' : 'text-text-muted'].join(' ')}>
-                        {new Date(task.due_date).toLocaleDateString('pt-BR')}
-                      </span>
-                    )}
-                  </a>
-                )
-              })}
-            </div>
-          )}
+          <HomeTaskList tasks={(myTasks ?? []) as Parameters<typeof HomeTaskList>[0]['tasks']} />
         </section>
 
         {/* Minhas Atividades */}
-        <section>
-          <h2 className="font-headline text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
-            Minhas Atividades
-          </h2>
-
-          {(!myActivities || myActivities.length === 0) ? (
-            <p className="text-sm text-text-muted py-4 border border-border text-center bg-surface-2">
-              Nenhuma atividade pendente.
-            </p>
-          ) : (
-            <div className="flex flex-col divide-y divide-border border border-border">
-              {myActivities.map((act) => {
-                const overdue = new Date(act.date) < new Date()
-                return (
-                  <a
-                    key={act.id}
-                    href={`/portfolio/${act.startup_id}/operacional`}
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface-2 transition-colors"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-text-primary font-label uppercase truncate">{act.type}</p>
-                      {act.notes && <p className="text-xs text-text-muted truncate">{act.notes}</p>}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className={['text-xs', overdue ? 'text-signal-red' : 'text-text-muted'].join(' ')}>
-                        {new Date(act.date).toLocaleDateString('pt-BR')}
-                      </p>
-                      <p className="text-[10px] text-text-muted">{act.status}</p>
-                    </div>
-                  </a>
-                )
-              })}
-            </div>
-          )}
+        <section className="flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 bg-surface border border-border border-b-0">
+            <h2 className="font-headline text-sm font-semibold text-text-primary">Minhas Atividades</h2>
+          </div>
+          <HomeActivityList activities={myActivities} />
         </section>
       </div>
     </div>

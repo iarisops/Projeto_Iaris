@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -208,6 +210,59 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          id: string
+          linkedin: string | null
+          name: string
+          notes: string | null
+          role: string | null
+          startup_candidate_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          linkedin?: string | null
+          name: string
+          notes?: string | null
+          role?: string | null
+          startup_candidate_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          linkedin?: string | null
+          name?: string
+          notes?: string | null
+          role?: string | null
+          startup_candidate_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_startup_candidate_id_fkey"
+            columns: ["startup_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "startup_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       context_versions: {
         Row: {
           ai_job_id: string | null
@@ -273,6 +328,7 @@ export type Database = {
           responsible_id: string | null
           startup_candidate_id: string
           status: string
+          title: string | null
           type: string
           updated_at: string | null
           updated_by: string | null
@@ -287,6 +343,7 @@ export type Database = {
           responsible_id?: string | null
           startup_candidate_id: string
           status?: string
+          title?: string | null
           type: string
           updated_at?: string | null
           updated_by?: string | null
@@ -301,6 +358,7 @@ export type Database = {
           responsible_id?: string | null
           startup_candidate_id?: string
           status?: string
+          title?: string | null
           type?: string
           updated_at?: string | null
           updated_by?: string | null
@@ -314,45 +372,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      contacts: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          email: string | null
-          id: string
-          linkedin: string | null
-          name: string
-          notes: string | null
-          updated_at: string | null
-          updated_by: string | null
-          whatsapp: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          linkedin?: string | null
-          name: string
-          notes?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          whatsapp?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          linkedin?: string | null
-          name?: string
-          notes?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          whatsapp?: string | null
-        }
-        Relationships: []
       }
       documents: {
         Row: {
@@ -462,6 +481,7 @@ export type Database = {
           description: string | null
           edition: string | null
           end_date: string | null
+          form_config: Json | null
           id: string
           name: string
           start_date: string | null
@@ -475,6 +495,7 @@ export type Database = {
           description?: string | null
           edition?: string | null
           end_date?: string | null
+          form_config?: Json | null
           id?: string
           name: string
           start_date?: string | null
@@ -488,6 +509,7 @@ export type Database = {
           description?: string | null
           edition?: string | null
           end_date?: string | null
+          form_config?: Json | null
           id?: string
           name?: string
           start_date?: string | null
@@ -1192,6 +1214,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "startup_candidates_primary_contact_id_fkey"
+            columns: ["primary_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "startup_candidates_stage_id_fkey"
             columns: ["stage_id"]
             isOneToOne: false
@@ -1340,6 +1369,23 @@ export type Enums<
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
