@@ -113,7 +113,11 @@ node worker/index.js
 5. Tentar converter novamente → sistema bloqueia com aviso
 6. Acessar Página Operacional da startup convertida:
    - Filtro de período deve estar no quarter atual
-   - Cabeçalho mostra Tier, Status de Jornada, Engajamento
+   - Cabeçalho mostra chips coloridos de Tier, Status da Jornada e Engajamento (vazio/tracejado se não definido)
+   - Passar o mouse sobre o ícone `?` de cada campo abre tooltip com descrição e link "Ver na Wiki" (abre em nova aba)
+   - Clicar em "Editar" ativa modo de edição: seletores aparecem para os 3 campos
+   - Selecionar Tier 1 ("Observação e Estruturante"), Status "Em Onboarding", Engajamento "Alto" → clicar "Salvar"
+   - Chips coloridos atualizam no cabeçalho; clicar "Cancelar" reverte sem salvar
 7. Criar Assessment para o quarter atual → preencher 6 categorias com sinais e texto
 8. Criar OKR "Atingir 10 clientes ativos" com 2 key results → status padrão "Em andamento"
 9. Atualizar métrica MRR = R$ 8.500 com valor anterior = R$ 7.200

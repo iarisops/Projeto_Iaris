@@ -50,8 +50,8 @@ export default async function AppShell({ children }: { children: ReactNode }) {
           <NavLink href="/meu-kanban">
             Meu Kanban
           </NavLink>
-          <NavLink href="/metodologia">
-            Metodologia
+          <NavLink href="/wiki">
+            Wiki
           </NavLink>
 
           {profile?.role === 'admin' && (

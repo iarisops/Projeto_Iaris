@@ -7,7 +7,7 @@
 ## Summary
 
 Sistema operacional interno da IARIS para gestão de startups da originação (CRM / Investor
-Day) ao portfólio operacional — implementado em Next.js 14 App Router no Vercel, com
+Day) ao portfólio operacional — implementado em Next.js 16.2.9 App Router no Vercel, com
 Supabase (Postgres + Auth + Storage) como única fonte de dados e um worker Node.js local
 para geração de Resumo de Contexto via Ollama.
 
@@ -21,11 +21,11 @@ ambiente exclusiva para servidor.
 **Language/Version**: TypeScript 5.x / Node.js 20 LTS
 
 **Primary Dependencies**:
-- `next` 14+ (App Router, Server Actions, Server Components)
+- `next` 16.2.9 (App Router, Server Actions, Server Components)
 - `@supabase/supabase-js` v2 + `@supabase/ssr` (auth helpers para App Router)
 - `tailwindcss` 3.x (design system tokens via CSS variables)
 - `@hello-pangea/dnd` (Kanban drag-and-drop — fork mantido de react-beautiful-dnd)
-- `next-mdx-remote` (Wiki de Metodologia — MDX estático no repositório)
+- `next-mdx-remote` (instalado, mas Wiki implementada como Server Component em `/wiki`)
 - `zod` (validação de inputs em Server Actions)
 - `date-fns` (cálculo de quarters, atraso de atividades)
 - `exceljs` (import script — lê .xlsm sem depender de COM / Office)
@@ -121,6 +121,7 @@ src/
 │   │   ├── page.tsx                # Home: grid portfólio, Minhas Tarefas, Minhas Atividades
 │   │   ├── meu-kanban/page.tsx     # Meu Kanban consolidado
 │   │   ├── atividades/page.tsx     # Tabela global de atividades (CRM + portfólio)
+│   │   ├── wiki/page.tsx           # Wiki de metodologia IARIS: Tiers, Jornada, Engajamento, Aderência
 │   │   ├── crm/
 │   │   │   ├── page.tsx            # lista de funis
 │   │   │   └── [funnel-id]/
@@ -131,9 +132,9 @@ src/
 │   │   ├── portfolio/
 │   │   │   └── [startup-id]/
 │   │   │       ├── perfil/page.tsx
-│   │   │       └── operacional/page.tsx
+│   │   │       └── operacional/page.tsx  # blocos na ordem PRD §20.5
 │   │   └── metodologia/
-│   │       └── [...slug]/page.tsx  # MDX Wiki pages
+│   │       └── [...slug]/page.tsx  # MDX (legado — Wiki migrada para /wiki)
 │   └── api/                        # apenas para integração externa (worker opcional)
 │       └── health/route.ts
 ├── components/
@@ -159,7 +160,7 @@ src/
 │   │   └── AtividadesTable.tsx     # tabela com filtros/sort/paginação
 │   └── portfolio/
 │       ├── AddStartupButton.tsx    # "+ Nova Startup" — criação direta no portfólio
-│       ├── OperationalHeader.tsx
+│       ├── OperationalHeader.tsx   # v2: chips coloridos Tier/Jornada/Engajamento, view/edit, HelpTooltip
 │       ├── AssessmentForm.tsx
 │       ├── OKRSection.tsx
 │       ├── MetricsSection.tsx

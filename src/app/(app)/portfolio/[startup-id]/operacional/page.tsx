@@ -245,8 +245,28 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
         />
       </div>
 
-      {/* Sections */}
+      {/* Sections — ordem PRD §20.5:
+          1. Cabeçalho (acima)
+          2. Resumo de Contexto
+          3. Objetivos e Indicadores (Assessment → OKRs → Métricas → Plano de Ação)
+          4. Kanban
+          5. Rituais e Reuniões
+          6. Buildagem, Anexos e Evidências
+          7. Relacionamento e Atividades
+      */}
       <div className="flex flex-col gap-10 px-6 pb-12 pt-8 max-w-5xl">
+
+        {/* 2. Resumo de Contexto */}
+        <section>
+          <ContextSection
+            startupId={startupId}
+            lastVersion={(contextVersions ?? [])[0] ?? null}
+            activeJob={activeJobRow ?? null}
+          />
+          <ContextHistory versions={contextVersions ?? []} />
+        </section>
+
+        {/* 3. Objetivos e Indicadores */}
         <section>
           <h2 className="font-headline text-base font-semibold text-text-primary mb-4">Assessment — {quarter}</h2>
           <AssessmentForm
@@ -283,6 +303,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 4. Kanban */}
         <section>
           <PortfolioKanban
             startupId={startupId}
@@ -291,6 +312,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 5. Rituais e Reuniões */}
         <section>
           <RitualsSection
             startupId={startupId}
@@ -298,6 +320,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 6. Buildagem, Anexos e Evidências */}
         <section>
           <DocumentsSection
             startupId={startupId}
@@ -305,6 +328,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 7. Relacionamento e Atividades */}
         <section>
           <PortfolioActivitiesSection
             startupId={startupId}
@@ -313,14 +337,6 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
-        <section>
-          <ContextSection
-            startupId={startupId}
-            lastVersion={(contextVersions ?? [])[0] ?? null}
-            activeJob={activeJobRow ?? null}
-          />
-          <ContextHistory versions={contextVersions ?? []} />
-        </section>
       </div>
     </div>
   )
