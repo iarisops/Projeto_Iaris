@@ -314,13 +314,17 @@ function TimelineItem({
 
 // ── Edit modal ────────────────────────────────────────────────────
 function EditActivityModal({
-  item, users, onClose, onSaved,
+  item, users, canAct, onClose, onSaved, onArchive, onDelete,
 }: {
   item: Activity
   users: User[]
+  canAct: boolean
   onClose: () => void
   onSaved: (updated: Partial<Activity>) => void
+  onArchive: (id: string, archive: boolean) => void
+  onDelete: (id: string) => void
 }) {
+  const isArchived = !!item.archived_at
   const { date, time } = parseDateParts(item.date)
   const [form, setForm] = useState({
     title:          item.title ?? '',
@@ -332,8 +336,9 @@ function EditActivityModal({
     note:           item.note ?? '',
     external_link:  item.external_link ?? '',
   })
-  const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState<string | null>(null)
+  const [saving,         setSaving]         = useState(false)
+  const [error,          setError]          = useState<string | null>(null)
+  const [confirmDelete,  setConfirmDelete]  = useState(false)
 
   const set = <K extends keyof typeof form>(key: K, val: string) =>
     setForm((f) => ({ ...f, [key]: val }))
@@ -394,9 +399,56 @@ function EditActivityModal({
         <Input label="Link externo" id="ea-link" type="url" value={form.external_link}
           onChange={(e) => set('external_link', e.target.value)} />
         {error && <p className="text-xs text-signal-red">{error}</p>}
-        <div className="flex gap-2 justify-end pt-1">
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" size="sm" disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
+
+        <div className="flex items-center justify-between gap-2 pt-1">
+          {/* Destructive actions — left side */}
+          {canAct && !confirmDelete && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { onArchive(item.id, !isArchived); onClose() }}
+                className="flex items-center gap-1 text-[11px] font-label text-text-muted hover:text-primary transition-colors"
+              >
+                <ArchiveIcon unarchive={isArchived} />
+                {isArchived ? 'Desarquivar' : 'Arquivar'}
+              </button>
+              <span className="text-border">|</span>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-1 text-[11px] font-label text-text-muted hover:text-signal-red transition-colors"
+              >
+                <TrashIcon />
+                Excluir
+              </button>
+            </div>
+          )}
+          {canAct && confirmDelete && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-signal-red font-label">Confirmar exclusão?</span>
+              <button
+                type="button"
+                onClick={() => { onDelete(item.id); onClose() }}
+                className="text-[11px] font-label font-semibold text-signal-red hover:underline"
+              >
+                Sim, excluir
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="text-[11px] font-label text-text-muted hover:text-text-primary"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+          {!canAct && <span />}
+
+          {/* Save actions — right side */}
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" size="sm" disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
+          </div>
         </div>
       </form>
     </Modal>
@@ -720,11 +772,20 @@ export function ActivityHistory({
         <EditActivityModal
           item={editingItem}
           users={users}
+          canAct={editingItem.created_by === currentUserId || isAdmin}
           onClose={() => setEditingItem(null)}
           onSaved={(updated) => {
             setItems((prev) =>
               prev.map((a) => a.id === editingItem.id ? { ...a, ...updated } : a)
             )
+            setEditingItem(null)
+          }}
+          onArchive={(id, archive) => {
+            handleArchive(id, archive)
+            setEditingItem(null)
+          }}
+          onDelete={(id) => {
+            handleDelete(id)
             setEditingItem(null)
           }}
         />
