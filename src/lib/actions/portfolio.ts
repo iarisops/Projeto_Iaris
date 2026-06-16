@@ -162,3 +162,97 @@ export async function uploadLogo(
   if (updateError) return { error: updateError.message }
   return { url: publicUrl }
 }
+
+// ─── addDocumentLink ──────────────────────────────────────────
+export async function addDocumentLink(
+  startupId: string,
+  name: string,
+  url: string
+): Promise<{ id?: string; error?: string }> {
+  if (!name.trim() || !url.trim()) return { error: 'Nome e URL são obrigatórios.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { data, error } = await supabase
+    .from('documents')
+    .insert({
+      startup_id:  startupId,
+      name:        name.trim(),
+      url:         url.trim(),
+      type:        'link',
+      created_by:  user.id,
+      updated_by:  user.id,
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) return { error: error?.message ?? 'Erro ao salvar link.' }
+  return { id: data.id }
+}
+
+// ─── uploadPortfolioDocument ──────────────────────────────────
+export async function uploadPortfolioDocument(
+  startupId: string,
+  formData: FormData
+): Promise<{ id?: string; url?: string; error?: string }> {
+  const file = formData.get('file') as File | null
+  if (!file || file.size === 0) return { error: 'Arquivo inválido.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const ext  = file.name.split('.').pop() ?? 'bin'
+  const slug = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const path = `${startupId}/${slug}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('portfolio-docs')
+    .upload(path, file, { contentType: file.type })
+
+  if (uploadError) return { error: uploadError.message }
+
+  const { data: { publicUrl } } = supabase.storage.from('portfolio-docs').getPublicUrl(path)
+
+  const { data, error } = await supabase
+    .from('documents')
+    .insert({
+      startup_id:   startupId,
+      name:         file.name,
+      url:          publicUrl,
+      storage_path: path,
+      type:         ext,
+      created_by:   user.id,
+      updated_by:   user.id,
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) return { error: error?.message ?? 'Erro ao salvar documento.' }
+  return { id: data.id, url: publicUrl }
+}
+
+// ─── deleteDocument ───────────────────────────────────────────
+export async function deleteDocument(
+  id: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { data: doc } = await supabase
+    .from('documents')
+    .select('storage_path')
+    .eq('id', id)
+    .single()
+
+  if (doc?.storage_path) {
+    await supabase.storage.from('portfolio-docs').remove([doc.storage_path])
+  }
+
+  const { error } = await supabase.from('documents').delete().eq('id', id)
+  if (error) return { error: error.message }
+  return {}
+}
