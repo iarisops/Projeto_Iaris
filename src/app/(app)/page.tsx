@@ -41,6 +41,7 @@ export default async function DashboardPage() {
     supabase
       .from('portfolio_startups')
       .select('id, name, logo_url, tier, journey_status, vertical, last_update_at')
+      .eq('is_system', false)
       .order('name'),
     supabase
       .from('kanban_tasks')

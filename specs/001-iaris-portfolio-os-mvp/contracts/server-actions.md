@@ -212,12 +212,22 @@ deleteActionPlan(id: string): Promise<void>
 createTask(startupId: string, data: KanbanTaskInput): Promise<{ id: string }>
 // phase padrão = 'Backlog'; quarter padrão = currentQuarter()
 // responsible_id padrão = usuário logado
+// Para tarefas IARIS: startupId = IARIS_STARTUP_ID, quarter = IARIS_QUARTER ('iaris')
 
 updateTask(id: string, data: Partial<KanbanTaskInput>): Promise<void>
+// description aceita HTML (gerado pelo RichTextEditor Tiptap)
+// links: [{ label, url }]
+
+deleteTask(taskId: string): Promise<{ error?: string }>
+// DELETE direto; sem soft delete no MVP
 
 moveTask(taskId: string, phase: PhaseEnum): Promise<void>
 // UPDATE phase; Dispara last_update_at na startup
 ```
+
+> As actions de Kanban são compartilhadas entre `PortfolioKanban`, `IariasKanban` e `MeuKanbanClient`.
+> O Kanban interno IARIS usa `startupId = IARIS_STARTUP_ID` e `quarter = IARIS_QUARTER` (constantes
+> em `src/lib/constants.ts`). Nenhuma action exclusiva foi necessária.
 
 ---
 

@@ -919,6 +919,7 @@ export type Database = {
           iaris_stake: number | null
           icp: string | null
           id: string
+          is_system: boolean
           journey_status: string | null
           last_update_at: string | null
           linkedin: string | null
@@ -952,6 +953,7 @@ export type Database = {
           iaris_stake?: number | null
           icp?: string | null
           id?: string
+          is_system?: boolean
           journey_status?: string | null
           last_update_at?: string | null
           linkedin?: string | null
@@ -985,6 +987,7 @@ export type Database = {
           iaris_stake?: number | null
           icp?: string | null
           id?: string
+          is_system?: boolean
           journey_status?: string | null
           last_update_at?: string | null
           linkedin?: string | null

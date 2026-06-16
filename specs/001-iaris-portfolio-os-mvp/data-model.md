@@ -232,6 +232,9 @@ CREATE TABLE public.portfolio_startups (
   tier                   SMALLINT CHECK (tier BETWEEN 0 AND 3),
   journey_status         TEXT,
   engagement             TEXT,
+  -- is_system = TRUE reservado para registros internos (ex: IARIS)
+  -- Registros de sistema são excluídos de todas as listagens do portfólio
+  is_system              BOOLEAN NOT NULL DEFAULT FALSE,
   last_update_at         TIMESTAMPTZ DEFAULT now(),
   created_at             TIMESTAMPTZ DEFAULT now(),
   updated_at             TIMESTAMPTZ DEFAULT now(),
@@ -239,6 +242,17 @@ CREATE TABLE public.portfolio_startups (
   updated_by             UUID REFERENCES auth.users
 );
 ```
+
+**Registro de sistema IARIS** (semeado em `0008_iaris_portfolio_record.sql`):
+```sql
+INSERT INTO public.portfolio_startups (id, name, is_system, founders)
+VALUES ('00000000-0000-0000-0000-000000000001', 'IARIS', TRUE, '[]')
+ON CONFLICT (id) DO NOTHING;
+```
+
+- Constante em `src/lib/constants.ts`: `IARIS_STARTUP_ID = '00000000-0000-0000-0000-000000000001'`
+- Todas as queries de portfólio filtram `.eq('is_system', false)` para excluir este registro.
+- Tarefas Kanban da IARIS usam este `id` como `startup_id` com `quarter = 'iaris'` (sentinel — ver abaixo).
 
 ### operational_assessments
 
@@ -378,8 +392,11 @@ CREATE TABLE public.kanban_tasks (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   startup_id     UUID NOT NULL REFERENCES public.portfolio_startups(id)
                  ON DELETE CASCADE,
+  -- quarter = 'iaris' é um sentinel para tarefas do Kanban interno da IARIS
+  -- (satisfaz NOT NULL sem alterar o schema; filtrado fora dos quarters reais)
   quarter        TEXT NOT NULL,
   title          TEXT NOT NULL,
+  -- description armazena HTML gerado pelo editor Tiptap (rich text)
   description    TEXT,
   -- phase = status (Constituição V — sem campo de status separado)
   phase          TEXT NOT NULL DEFAULT 'Backlog'
@@ -396,6 +413,8 @@ CREATE TABLE public.kanban_tasks (
   updated_by     UUID REFERENCES auth.users
 );
 ```
+
+Constante em `src/lib/constants.ts`: `IARIS_QUARTER = 'iaris'`
 
 ### rituals
 
@@ -544,12 +563,16 @@ funnels
         └── portfolio_startups (FK converted_portfolio_startup_id)
 
 portfolio_startups
+  ├── is_system=FALSE → startups reais do portfólio
+  ├── is_system=TRUE  → registro interno IARIS (id fixo 00000000-...-0001)
   ├── operational_assessments (1:N por quarter)
   │     └── assessment_items (1:N, uma por categoria)
   ├── okrs (1:N)
   │     └── action_plans (1:N via okr_id)
   ├── metrics (1:N)
   ├── kanban_tasks (1:N)
+  │     ├── quarter normal (ex: 'Q2-2026') → tarefas da startup
+  │     ├── quarter = 'iaris' → tarefas do Kanban interno IARIS
   │     └── documents (N:1 via kanban_task_id)
   ├── rituals (1:N)
   ├── documents (1:N)

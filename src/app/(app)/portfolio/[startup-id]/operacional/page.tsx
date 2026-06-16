@@ -63,6 +63,8 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
 
   const supabase = await createClient()
 
+  const { data: { user: currentUser } } = await supabase.auth.getUser()
+
   const { data: startup } = await supabase
     .from('portfolio_startups')
     .select('id, name, logo_url, tier, stage, journey_status, engagement, last_update_at, short_description')
@@ -83,6 +85,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
     { data: criteria },
     { data: contextVersions },
     { data: activeJobRow },
+    { data: users },
   ] = await Promise.all([
     supabase
       .from('operational_assessments')
@@ -109,7 +112,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
       .order('created_at'),
     supabase
       .from('kanban_tasks')
-      .select('id, title, description, phase, responsible_id, due_date, comments')
+      .select('id, title, description, phase, responsible_id, due_date, comments, links, created_at, created_by')
       .eq('startup_id', startupId)
       .eq('quarter', quarter)
       .order('created_at'),
@@ -147,6 +150,10 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('users')
+      .select('id, name')
+      .order('name'),
   ])
 
   // Fetch CRM activities from any candidate converted to this portfolio startup
@@ -308,7 +315,14 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           <PortfolioKanban
             startupId={startupId}
             quarter={quarter}
-            tasks={(kanbanTasks ?? []) as Parameters<typeof PortfolioKanban>[0]['tasks']}
+            tasks={(kanbanTasks ?? []).map((t) => ({
+              ...t,
+              links: Array.isArray(t.links) ? (t.links as { label: string; url: string }[]) : [],
+              created_at: t.created_at ?? null,
+              created_by: t.created_by ?? null,
+            }))}
+            users={(users ?? []) as { id: string; name: string }[]}
+            currentUserId={currentUser?.id}
           />
         </section>
 
