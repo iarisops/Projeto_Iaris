@@ -22,6 +22,7 @@ const PHASE_LABEL: Record<string, string> = {
 export default async function CandidataPage({ params }: Props) {
   const { 'funnel-id': funnelId, id: candidateId } = await params
   const supabase = await createClient()
+  const { data: { user: authUser } } = await supabase.auth.getUser()
 
   const [
     { data: candidate },
@@ -31,6 +32,7 @@ export default async function CandidataPage({ params }: Props) {
     { data: activities },
     { data: contacts },
     { data: users },
+    { data: currentUserProfile },
   ] = await Promise.all([
     supabase.from('startup_candidates').select('*').eq('id', candidateId).single(),
     supabase.from('funnels').select('id, name, form_config').eq('id', funnelId).single(),
@@ -39,6 +41,7 @@ export default async function CandidataPage({ params }: Props) {
     supabase.from('crm_activities').select('*').eq('startup_candidate_id', candidateId).order('date', { ascending: false }),
     supabase.from('contacts').select('*').eq('startup_candidate_id', candidateId).order('created_at'),
     supabase.from('users').select('id, name').order('name'),
+    supabase.from('users').select('id, role').eq('id', authUser?.id ?? '').maybeSingle(),
   ])
 
   if (!candidate || !funnel) notFound()
@@ -156,6 +159,8 @@ export default async function CandidataPage({ params }: Props) {
               funnelId={funnelId}
               items={activities ?? []}
               users={users ?? []}
+              currentUserId={currentUserProfile?.id ?? ''}
+              isAdmin={currentUserProfile?.role === 'admin'}
             />
           </section>
 

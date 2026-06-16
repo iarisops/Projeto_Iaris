@@ -235,6 +235,67 @@ export async function updateActivity(
   return {}
 }
 
+// ─── archiveActivity ─────────────────────────────────────────
+// archive=true sets archived_at/archived_by; archive=false clears them.
+// Restricted to creator or admin.
+
+export async function archiveActivity(
+  id: string,
+  archive: boolean
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const [{ data: activity }, { data: profile }] = await Promise.all([
+    supabase.from('crm_activities').select('created_by').eq('id', id).single(),
+    supabase.from('users').select('role').eq('id', user.id).single(),
+  ])
+
+  if (!activity) return { error: 'Atividade não encontrada.' }
+  if (activity.created_by !== user.id && profile?.role !== 'admin') {
+    return { error: 'Apenas o criador ou um administrador pode arquivar esta atividade.' }
+  }
+
+  const { error } = await supabase
+    .from('crm_activities')
+    .update({
+      archived_at: archive ? new Date().toISOString() : null,
+      archived_by: archive ? user.id : null,
+      updated_at: new Date().toISOString(),
+      updated_by: user.id,
+    })
+    .eq('id', id)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
+// ─── deleteActivity ───────────────────────────────────────────
+// Hard delete. Restricted to creator or admin.
+
+export async function deleteActivity(
+  id: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const [{ data: activity }, { data: profile }] = await Promise.all([
+    supabase.from('crm_activities').select('created_by').eq('id', id).single(),
+    supabase.from('users').select('role').eq('id', user.id).single(),
+  ])
+
+  if (!activity) return { error: 'Atividade não encontrada.' }
+  if (activity.created_by !== user.id && profile?.role !== 'admin') {
+    return { error: 'Apenas o criador ou um administrador pode excluir esta atividade.' }
+  }
+
+  const { error } = await supabase.from('crm_activities').delete().eq('id', id)
+  if (error) return { error: error.message }
+  return {}
+}
+
 // ─── saveQualitativeAssessment (UPSERT) ───────────────────────
 // One assessment per candidate — check and UPDATE if exists, INSERT if not.
 
