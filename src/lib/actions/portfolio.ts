@@ -42,6 +42,40 @@ const TierStatusSchema = z.object({
   engagement: z.string().optional(),
 })
 
+const StartupCreateSchema = z.object({
+  name:              z.string().min(1),
+  site:              z.string().optional(),
+  vertical:          z.string().optional(),
+  stage:             z.enum(['Ideação', 'Validação', 'Operação', 'Tração', 'Escala']).optional(),
+  short_description: z.string().optional(),
+  entry_date:        z.string().optional(),
+})
+
+export async function createPortfolioStartup(
+  data: z.infer<typeof StartupCreateSchema>
+): Promise<{ id?: string; error?: string }> {
+  const parsed = StartupCreateSchema.safeParse(data)
+  if (!parsed.success) return { error: 'Dados inválidos.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { data: startup, error } = await supabase
+    .from('portfolio_startups')
+    .insert({
+      ...parsed.data,
+      founders:   [],
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select('id')
+    .single()
+
+  if (error || !startup) return { error: error?.message ?? 'Erro ao criar startup.' }
+  return { id: startup.id }
+}
+
 export async function updatePortfolioProfile(
   startupId: string,
   data: z.infer<typeof ProfileSchema>

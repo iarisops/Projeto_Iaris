@@ -1,6 +1,6 @@
 # Implementation Plan: IARIS Portfolio OS — MVP Completo
 
-**Branch**: `001-iaris-portfolio-os-mvp` | **Date**: 2026-06-14 | **Spec**: [spec.md](spec.md)
+**Branch**: `001-iaris-portfolio-os-mvp` | **Date**: 2026-06-15 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/001-iaris-portfolio-os-mvp/spec.md`
 
@@ -118,8 +118,9 @@ src/
 │   │       └── [id]/page.tsx
 │   ├── (app)/
 │   │   ├── layout.tsx              # nav principal + guard de autenticação
-│   │   ├── page.tsx                # dashboard: lista portfólio + tarefas + atividades
+│   │   ├── page.tsx                # Home: grid portfólio, Minhas Tarefas, Minhas Atividades
 │   │   ├── meu-kanban/page.tsx     # Meu Kanban consolidado
+│   │   ├── atividades/page.tsx     # Tabela global de atividades (CRM + portfólio)
 │   │   ├── crm/
 │   │   │   ├── page.tsx            # lista de funis
 │   │   │   └── [funnel-id]/
@@ -137,8 +138,38 @@ src/
 │       └── health/route.ts
 ├── components/
 │   ├── ui/                         # primitivos do design system (Button, Card, Badge…)
-│   ├── crm/                        # KanbanBoard, CandidateCard, ActivityForm…
-│   └── portfolio/                  # OperationalPage, AssessmentForm, OKRCard…
+│   ├── crm/
+│   │   ├── KanbanBoard.tsx
+│   │   ├── CandidateCard.tsx
+│   │   ├── ActivityHistory.tsx     # timeline unificada com ícones SVG, gear edit, deep-link
+│   │   ├── CandidateInfoEditor.tsx # edição inline de informações da candidata
+│   │   ├── CandidateNotesEditor.tsx
+│   │   ├── CandidateAttachmentsSection.tsx
+│   │   ├── CompactEvaluationPanel.tsx
+│   │   ├── ContactsPanel.tsx
+│   │   ├── FunnelStageProgress.tsx
+│   │   ├── QualitativeAssessmentForm.tsx
+│   │   ├── PanelEvaluationConsolidation.tsx
+│   │   ├── StageManager.tsx
+│   │   └── ConvertToPortfolioDialog.tsx
+│   ├── home/
+│   │   ├── HomeTaskList.tsx        # tarefas com círculo clicável, optimistic remove
+│   │   └── HomeActivityList.tsx    # atividades unificadas com select de status
+│   ├── atividades/
+│   │   └── AtividadesTable.tsx     # tabela com filtros/sort/paginação
+│   └── portfolio/
+│       ├── AddStartupButton.tsx    # "+ Nova Startup" — criação direta no portfólio
+│       ├── OperationalHeader.tsx
+│       ├── AssessmentForm.tsx
+│       ├── OKRSection.tsx
+│       ├── MetricsSection.tsx
+│       ├── ActionPlanSection.tsx
+│       ├── PortfolioKanban.tsx
+│       ├── RitualsSection.tsx
+│       ├── DocumentsSection.tsx
+│       ├── PortfolioActivitiesSection.tsx  # unifica atividades CRM + portfólio
+│       ├── ContextSection.tsx
+│       └── ContextHistory.tsx
 ├── lib/
 │   ├── supabase/
 │   │   ├── client.ts               # createBrowserClient()
@@ -149,7 +180,7 @@ src/
 │   │   ├── funnels.ts
 │   │   ├── candidates.ts
 │   │   ├── assessments.ts
-│   │   ├── portfolio.ts
+│   │   ├── portfolio.ts            # inclui createPortfolioStartup()
 │   │   ├── okrs.ts
 │   │   ├── metrics.ts
 │   │   ├── kanban.ts

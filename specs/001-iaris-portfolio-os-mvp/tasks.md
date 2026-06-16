@@ -210,7 +210,47 @@
 - [x] T072 Revisar conformidade de design system em todas as telas: (a) fundo Deep Navy `#000033` em todas as camadas base; (b) botões primários Teal `#009999` com 0px border-radius; (c) ausência de `box-shadow` — substituir por variações de `background-color` para profundidade; (d) grid de 30px como background pattern; (e) fontes Hanken Grotesk em headings, Plus Jakarta Sans em body
 - [x] T073 Rodar `npx tsc --noEmit` e corrigir todos os erros de tipo
 - [x] T074 [P] Rodar `npm run lint` e corrigir todos os warnings de lint
-- [ ] T075 Executar os 5 cenários de validação do `specs/001-iaris-portfolio-os-mvp/quickstart.md` e documentar resultado de cada etapa
+- [x] T075 Executar os 5 cenários de validação do `specs/001-iaris-portfolio-os-mvp/quickstart.md` e documentar resultado de cada etapa — Cenários 1–4 validados; Cenário 5 (IA local/Ollama) pendente de setup de worker
+
+---
+
+## Phase 9: UX Improvements — Candidate Page, Home & Activities (post-MVP)
+
+**Purpose**: UX refinements após validação inicial — redesign da página de candidata, centralização de atividades, home dashboard, e feature de Atividades global.
+
+### Página da Startup Candidata (CRM)
+
+- [x] T076 [P] Redesenhar seção "Atividades, Notas & Anexos" em `src/components/crm/ActivityHistory.tsx` (substituiu `ActivityTimeline.tsx`): ícone SVG por tipo de atividade, botão gear para abrir modal de edição completo, status badge ciclável (Pendente→Concluída→Cancelada), cada item com `id="activity-{id}"` para deep-link por hash de URL; ⚠️ mantém `ActivityTimeline.tsx` antigo para retrocompatibilidade com componentes legados
+- [x] T077 [P] Extrair edição inline de informações da candidata em `src/components/crm/CandidateInfoEditor.tsx` — formulário completo com todos os campos da candidata, chamando `updateCandidate()`
+- [x] T078 [P] Extrair seção de notas da candidata em `src/components/crm/CandidateNotesEditor.tsx`
+- [x] T079 [P] Extrair seção de anexos da candidata em `src/components/crm/CandidateAttachmentsSection.tsx`
+- [x] T080 [P] Criar painel de avaliação compacto `src/components/crm/CompactEvaluationPanel.tsx` — exibe resumo de avaliação qualitativa + banca na página da candidata
+- [x] T081 [P] Criar componente `ContactsPanel.tsx` em `src/components/crm/ContactsPanel.tsx` — lista de contatos com ações WhatsApp
+- [x] T082 [P] Criar `FunnelStageProgress.tsx` em `src/components/crm/FunnelStageProgress.tsx` — visualização de progresso da candidata no funil
+
+### Home Dashboard
+
+- [x] T083 Renomear seção "Portfólio" para "Home" no `h1` da `src/app/(app)/page.tsx` e no link do sidebar em `AppShell.tsx`
+- [x] T084 Criar `src/components/home/HomeTaskList.tsx` — lista de tarefas do usuário com círculo clicável para concluir (optimistic UI via `moveTask()`), badge de startup
+- [x] T085 Criar `src/components/home/HomeActivityList.tsx` — lista de atividades unificadas (CRM + portfólio) com select de status à direita, badge CRM/startup, click em atividade CRM abre página da candidata com modal via hash `#activity-{id}`; exporta interface `UnifiedActivity`
+- [x] T086 Atualizar `src/app/(app)/page.tsx`: queries para `myTasks` (com join `portfolio_startups`), `myPortfolioActivities` e `myCrmActivities`; normalizar em `UnifiedActivity[]`; link CRM: `/crm/{funnel_id}/candidatas/{candidate_id}#activity-{id}`; renderizar `HomeTaskList` e `HomeActivityList`
+- [x] T087 Criar `src/components/portfolio/AddStartupButton.tsx` — botão "+ Nova Startup" na Home que abre modal para adicionar startup diretamente ao portfólio (sem passar pelo CRM); campos: Nome*, Site, Data de Entrada, Vertical, Estágio, Breve Descrição; chama `createPortfolioStartup()` e redireciona para `/portfolio/{id}/perfil`
+
+### Portfólio — Atividades Unificadas
+
+- [x] T088 Reescrever `PortfolioActivitiesSection.tsx` para exibir atividades do CRM (de candidatas convertidas, via `startup_candidates.converted_portfolio_startup_id`) juntamente com atividades do portfólio — interface `UnifiedActivity` normaliza ambas as fontes; itens CRM têm borda âmbar e badge `[CRM]`; atualizar `operacional/page.tsx` para buscar `crm_activities` das candidatas vinculadas e passar via prop
+
+### Feature: Atividades Global
+
+- [x] T089 Criar `src/app/(app)/atividades/page.tsx` — Server Component que busca todas as `crm_activities` e `portfolio_activities`, normaliza em `TableActivity[]` (id, source, type, title, date, status, responsible_id, responsible_name, context_name, href), passa `defaultResponsavel={user.id}` e `defaultStatus="Pendente"`
+- [x] T090 Criar `src/components/atividades/AtividadesTable.tsx` — Client Component com tabela de atividades: 7 colunas ordináveis (Título, Tipo, Data, Status, Responsável, Contexto, Origem), filtros por responsável/startup/status/datas/origem, paginação 25/página via `useMemo`; pré-seleção de filtros via props `defaultResponsavel` e `defaultStatus`
+- [x] T091 Adicionar "Atividades" ao menu lateral em `AppShell.tsx` — link `/atividades` abaixo do CRM
+
+### Server Action — Criação Direta no Portfólio
+
+- [x] T092 Adicionar `createPortfolioStartup(data)` em `src/lib/actions/portfolio.ts` — valida com `StartupCreateSchema` (Zod), insere em `portfolio_startups` com `founders: []`, retorna `{ id }` — permite entrada direta de startups no portfólio sem passar pelo funil CRM
+
+**Checkpoint**: Home com listas de tarefas/atividades unificadas, página de candidata redesenhada, seção Atividades global com filtros, portfólio acessível via "+ Nova Startup".
 
 ---
 

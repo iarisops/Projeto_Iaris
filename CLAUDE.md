@@ -128,18 +128,25 @@ Status mapping rule (spreadsheet mixes stage and result in one column):
 
 Full spec in `.llm/DESIGN.md`. Key tokens:
 
-| Token | Value |
-|---|---|
-| Primary background | Deep Navy `#000033` |
-| Primary action | Vibrant Teal `#009999` |
-| Accent | Innovation Amber `#fbb33d` |
-| Grid / borders | Slate Blue `#303f59` / Marker Blue `#6787bf` |
-| Headline font | Hanken Grotesk |
-| Body font | Plus Jakarta Sans |
-| Label / code font | Geist |
+| Token | Value | Use |
+|---|---|---|
+| `--color-background` | `#f5f7fc` | Page background (light) |
+| `--color-surface` | `#ffffff` | Cards, panels |
+| `--color-surface-2` | `#eceef7` | Secondary surfaces, Kanban columns |
+| `--color-border` | `#e2e8f4` | Borders, dividers |
+| `--color-text-primary` | `#0d1226` | Headings |
+| `--color-text-secondary` | `#4d5b7c` | Body text |
+| `--color-text-muted` | `#8492b0` | Metadata |
+| Primary action | Vibrant Teal `#009999` | Buttons, active states |
+| Accent | Innovation Amber `#fbb33d` | Highlights |
+| Brand nav | Deep Navy `#000033` | Sidebar background |
+| Headline font | Hanken Grotesk | |
+| Body font | Plus Jakarta Sans | |
+| Label / code font | Geist | |
 
+**Theme:** Light by default. The sidebar uses `.dark-surface` CSS class to stay in Deep Navy.  
 Primary buttons: rectangular, 0px radius, Teal fill.  
-Depth via tonal layering, not shadows. 30px technical marker grid as background pattern.
+Depth via tonal layering (border + bg tint), no shadows. 30px grid pattern using `#e2e8f4` lines.
 
 ## Implementation phases (from PRD §51)
 

@@ -111,6 +111,17 @@ updatePanelEvaluation(id: string, data: Partial<PanelEvaluationInput>): Promise<
 ## Portfólio — Perfil (`lib/actions/portfolio.ts`)
 
 ```typescript
+createPortfolioStartup(data: {
+  name: string;
+  site?: string;
+  vertical?: string;
+  stage?: 'Ideação' | 'Validação' | 'Operação' | 'Tração' | 'Escala';
+  short_description?: string;
+  entry_date?: string;
+}): Promise<{ id?: string; error?: string }>
+// Criação direta no portfólio sem passar pelo CRM (para startups já no portfólio)
+// INSERT com founders: [] (required non-null field); retorna id da nova startup
+
 updatePortfolioProfile(startupId: string, data: Partial<PortfolioProfileInput>): Promise<void>
 // UPDATE portfolio_startups; UPDATE last_update_at
 

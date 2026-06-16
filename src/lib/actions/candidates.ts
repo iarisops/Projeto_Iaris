@@ -30,14 +30,17 @@ const CandidateCreateSchema = z.object({
   pitch_deck_url: z.string().optional(),
   next_action: z.string().optional(),
   import_note: z.string().optional(),
+  extra_fields: z.record(z.string(), z.string()).optional(),
+  contact_name: z.string().optional(),
 })
 
-const CandidateUpdateSchema = CandidateCreateSchema.omit({ funnel_id: true }).partial()
+const CandidateUpdateSchema = CandidateCreateSchema.omit({ funnel_id: true, contact_name: true }).partial()
 
 const ActivityCreateSchema = z.object({
   startup_candidate_id: z.string().uuid(),
   type: z.string().min(1),
   date: z.string(),
+  title: z.string().optional(),
   responsible_id: z.string().uuid().optional(),
   status: z
     .enum(['Pendente', 'Agendada', 'Concluída', 'Reagendada', 'Cancelada'])
@@ -82,9 +85,33 @@ export async function createCandidate(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Não autenticado.' }
 
+  // Create contact record if a contact name is provided
+  let primaryContactId: string | undefined
+  const { contact_name, ...candidateFields } = parsed.data
+  if (contact_name?.trim()) {
+    const { data: contact } = await supabase
+      .from('contacts')
+      .insert({
+        name:       contact_name.trim(),
+        whatsapp:   candidateFields.whatsapp?.trim() || null,
+        email:      candidateFields.email?.trim() || null,
+        created_by: user.id,
+        updated_by: user.id,
+      })
+      .select('id')
+      .single()
+    if (contact) primaryContactId = contact.id
+  }
+
   const { data: candidate, error } = await supabase
     .from('startup_candidates')
-    .insert({ ...parsed.data, created_by: user.id, updated_by: user.id })
+    .insert({
+      ...candidateFields,
+      primary_contact_id: primaryContactId ?? null,
+      extra_fields: (candidateFields.extra_fields ?? {}) as Json,
+      created_by: user.id,
+      updated_by: user.id,
+    })
     .select('id')
     .single()
 

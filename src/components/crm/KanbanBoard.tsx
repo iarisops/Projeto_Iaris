@@ -26,7 +26,6 @@ export function KanbanBoard({ stages, candidates: initialCandidates, funnelId }:
     for (const stage of activeStages) {
       map[stage.id] = candidates.filter((c) => c.stage_id === stage.id)
     }
-    // Unassigned candidates
     map['__none__'] = candidates.filter((c) => !c.stage_id)
     return map
   }, [candidates, activeStages])
@@ -38,7 +37,6 @@ export function KanbanBoard({ stages, candidates: initialCandidates, funnelId }:
 
     const newStageId = destination.droppableId === '__none__' ? null : destination.droppableId
 
-    // Optimistic update
     setCandidates((prev) =>
       prev.map((c) => (c.id === draggableId ? { ...c, stage_id: newStageId } : c))
     )
@@ -49,20 +47,23 @@ export function KanbanBoard({ stages, candidates: initialCandidates, funnelId }:
   }
 
   const stageMap = byStage()
-  const columnsToShow = [...activeStages]
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-4 min-h-[60vh]">
-        {columnsToShow.map((stage) => {
+      <div className="flex gap-3 overflow-x-auto h-full pb-4">
+        {activeStages.map((stage) => {
           const cards = stageMap[stage.id] ?? []
           return (
-            <div key={stage.id} className="flex-shrink-0 w-64 flex flex-col gap-2">
-              <div className="flex items-center justify-between px-1 py-2 border-b border-border">
-                <span className="font-label text-xs text-text-secondary uppercase tracking-wider truncate">
+            <div key={stage.id} className="flex-shrink-0 w-64 flex flex-col h-full">
+
+              {/* Column header */}
+              <div className="flex items-center justify-between px-1 pb-2.5 shrink-0">
+                <span className="font-label text-xs font-semibold text-[#0d1226] uppercase tracking-wider truncate">
                   {stage.name}
                 </span>
-                <span className="text-xs text-text-muted ml-2 shrink-0">{cards.length}</span>
+                <span className="ml-2 shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-[#e2e8f4] text-[10px] font-label text-[#4d5b7c]">
+                  {cards.length}
+                </span>
               </div>
 
               <Droppable droppableId={stage.id}>
@@ -71,8 +72,10 @@ export function KanbanBoard({ stages, candidates: initialCandidates, funnelId }:
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={[
-                      'flex-1 flex flex-col gap-2 p-1 min-h-[200px] transition-colors',
-                      snapshot.isDraggingOver ? 'bg-primary/5' : '',
+                      'flex-1 flex flex-col gap-2 p-2 min-h-[200px] overflow-y-auto transition-colors',
+                      snapshot.isDraggingOver
+                        ? 'bg-[#009999]/8'
+                        : 'bg-[#eceef7]/60',
                     ].join(' ')}
                   >
                     {cards.map((candidate, index) => (

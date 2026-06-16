@@ -9,19 +9,19 @@
   --color-slate-blue:         #303f59;
   --color-marker-blue:        #6787bf;
 
-  /* Semantic aliases */
-  --color-background:         var(--color-deep-navy);
-  --color-surface:            #0a0f2e;   /* slightly lifted from deep navy */
-  --color-surface-2:          #111840;   /* second elevation */
-  --color-border:             var(--color-slate-blue);
-  --color-border-subtle:      #1e2a40;
+  /* Semantic aliases — light theme */
+  --color-background:         #f5f7fc;
+  --color-surface:            #ffffff;
+  --color-surface-2:          #eceef7;
+  --color-border:             #e2e8f4;
+  --color-border-subtle:      #f0f2f8;
   --color-primary:            var(--color-vibrant-teal);
   --color-accent:             var(--color-innovation-amber);
 
   /* Text */
-  --color-text-primary:       #f0f4ff;
-  --color-text-secondary:     #8fa3c8;
-  --color-text-muted:         #4a5f80;
+  --color-text-primary:       #0d1226;
+  --color-text-secondary:     #4d5b7c;
+  --color-text-muted:         #8492b0;
 
   /* Signal colours (assessment) */
   --color-signal-red:         #e53e3e;
@@ -63,11 +63,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ─── Dark surface override (sidebar, auth pages) ─── */
+.dark-surface {
+  --color-background:     #000033;
+  --color-surface:        #0a0f2e;
+  --color-surface-2:      #111840;
+  --color-border:         #303f59;
+  --color-border-subtle:  #1e2a40;
+  --color-text-primary:   #f0f4ff;
+  --color-text-secondary: #8fa3c8;
+  --color-text-muted:     #4a5f80;
+}
+
 /* Technical marker grid background pattern (30px) */
 .bg-grid {
   background-image:
-    linear-gradient(to right, var(--color-slate-blue) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--color-slate-blue) 1px, transparent 1px);
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
   background-size: 30px 30px;
   background-position: 0 0;
 }
