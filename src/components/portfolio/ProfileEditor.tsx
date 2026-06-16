@@ -154,11 +154,11 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Site" value={startup.site} />
-            <Field label="LinkedIn" value={startup.linkedin} />
-            <Field label="Vertical" value={startup.vertical} />
-            <Field label="Segmento" value={startup.segment} />
-            <Field label="Fase" value={startup.stage} />
+            <Field label="Site" value={fields.site} />
+            <Field label="LinkedIn" value={fields.linkedin} />
+            <Field label="Vertical" value={fields.vertical} />
+            <Field label="Segmento" value={fields.segment} />
+            <Field label="Fase" value={fields.stage} />
           </div>
         )}
       </section>
@@ -195,13 +195,13 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <Field label="Descrição" value={startup.short_description} />
-            <Field label="Problema" value={startup.problem} />
-            <Field label="Solução" value={startup.solution} />
-            <Field label="ICP" value={startup.icp} />
-            <Field label="Modelo de negócio" value={startup.business_model} />
-            <Field label="Modelo de receita" value={startup.revenue_model} />
-            {!startup.short_description && !startup.problem && !startup.solution && (
+            <Field label="Descrição" value={fields.short_description} />
+            <Field label="Problema" value={fields.problem} />
+            <Field label="Solução" value={fields.solution} />
+            <Field label="ICP" value={fields.icp} />
+            <Field label="Modelo de negócio" value={fields.business_model} />
+            <Field label="Modelo de receita" value={fields.revenue_model} />
+            {!fields.short_description && !fields.problem && !fields.solution && (
               <p className="text-sm text-text-muted">Nenhuma descrição cadastrada.</p>
             )}
           </div>
@@ -244,25 +244,25 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Rodada" value={startup.funding_round} />
-            {startup.funding_target != null && (
+            <Field label="Rodada" value={fields.funding_round} />
+            {fields.funding_target && (
               <div>
                 <p className="text-xs text-text-muted uppercase font-label tracking-wide">Alvo</p>
                 <p className="text-sm text-text-primary">
-                  R$ {startup.funding_target.toLocaleString('pt-BR')}
+                  R$ {Number(fields.funding_target).toLocaleString('pt-BR')}
                 </p>
               </div>
             )}
-            <Field label="Instrumento" value={startup.valuation_instrument} />
-            {startup.iaris_stake != null && (
+            <Field label="Instrumento" value={fields.valuation_instrument} />
+            {fields.iaris_stake && (
               <div>
                 <p className="text-xs text-text-muted uppercase font-label tracking-wide">Stake IARIS</p>
-                <p className="text-sm text-text-primary">{startup.iaris_stake}%</p>
+                <p className="text-sm text-text-primary">{fields.iaris_stake}%</p>
               </div>
             )}
-            <Field label="Captable" value={startup.captable_summary} />
-            <Field label="Uso do capital" value={startup.funding_use} />
-            {!startup.funding_round && !startup.captable_summary && (
+            <Field label="Captable" value={fields.captable_summary} />
+            <Field label="Uso do capital" value={fields.funding_use} />
+            {!fields.funding_round && !fields.captable_summary && (
               <p className="text-sm text-text-muted col-span-2">Nenhum dado de investimento.</p>
             )}
           </div>
