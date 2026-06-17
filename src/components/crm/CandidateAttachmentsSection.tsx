@@ -56,6 +56,8 @@ export function CandidateAttachmentsSection({ candidateId, funnelId, attachments
           updated_at: new Date().toISOString(),
           created_by: null,
           updated_by: null,
+          archived_at: null,
+          archived_by: null,
         }, ...prev])
       }
     }
