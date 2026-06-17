@@ -120,6 +120,8 @@ export function ActivityTimeline({ candidateId, activities: initialActivities, u
         updated_at:            new Date().toISOString(),
         created_by:            null,
         updated_by:            null,
+        archived_at:           null,
+        archived_by:           null,
       }
       setActivities((prev) => [newActivity, ...prev])
       setForm({
