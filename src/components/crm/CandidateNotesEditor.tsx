@@ -48,6 +48,8 @@ export function CandidateNotesEditor({ candidateId, notes: initialNotes }: Props
           updated_at: new Date().toISOString(),
           created_by: null,
           updated_by: null,
+          archived_at: null,
+          archived_by: null,
         }, ...prev])
       }
       setText('')
