@@ -198,3 +198,204 @@ The sidebar always uses `.dark-surface`. Logo: `Logo-IARIS-fundo escuro.png`. Na
 - **All containers, cards, inputs:** 0px radius (sharp) as the default.
 - **Small UI affordances** (count badges, avatars): `rounded-full`.
 - **Modal corners:** 0px (consistent with card language).
+
+---
+
+## Kanban & Card Pattern
+
+> **Standard**: Every Kanban view in the system (Portfolio Kanban, CRM Kanban, Meu Kanban) MUST follow this anatomy. Use the reference image at `assets/referencias_design_layout/pagina operacional startup/referencia_kanban_pagina_operacional.png` as the visual benchmark. Only colors diverge — apply IARIS tokens instead of the reference palette.
+
+### Column layout
+
+```
+[Phase Name]  [● count]        [+] [•••]
+┌──────────────────────────────────────┐
+│ card                                 │
+│ card                                 │
+│ ...                                  │
+│                        (drop zone)   │
+└──────────────────────────────────────┘
+```
+
+| Element | Spec |
+|---|---|
+| Column width | `272px` fixed, horizontal scroll when > 4 columns |
+| Column gap | `16px` (`gap-4`) |
+| Column body bg | `bg-surface-2/60` at rest; `bg-primary/5 border-primary/20` while dragging over |
+| Column body border | `1px solid --color-border` |
+| Column body min-height | `240px` |
+| Column body padding | `8px` (`p-2`), `gap-10px` between cards |
+| Column header | No background — floats above column body |
+| Phase name | `font-headline text-sm font-semibold text-text-primary` |
+| Count badge | `w-5 h-5 rounded-full` — **phase-colored** (see token table below) |
+| "+" button | `text-text-muted hover:text-text-primary`, opens inline add form at bottom of column |
+| "..." button | `text-text-muted hover:text-text-primary`, column-level actions (future) |
+
+### Card anatomy
+
+```
+┌─────────────────────────────────────────┐
+│  [● Phase chip]                   [•••] │  ← header row
+│                                         │
+│  Title text bold                        │  ← title
+│  Description truncated to 2 lines       │  ← description (optional)
+│                                         │
+│  Responsável:  [○ avatar]               │  ← responsible row
+│  ─────────────────────────────────────  │  ← divider (border-subtle)
+│  📅 25 Mar 2025    💬 1                 │  ← footer: date + comment count
+└─────────────────────────────────────────┘
+```
+
+| Element | Spec |
+|---|---|
+| Card bg | `bg-surface border border-border hover:border-primary/40` |
+| Card radius | `0px` |
+| Card padding | `px-3.5`, `pt-3.5` header, `py-3` footer |
+| Card gap between sections | `gap-0` on container; individual spacing via `mt-*` |
+| Overdue card | `border-signal-red/40 hover:border-signal-red/70` |
+| Drag ghost | `opacity-80 rotate-1` |
+| Phase chip | `inline-flex items-center gap-1.5 px-2 py-0.5 border text-[10px] font-semibold font-label` — phase-colored (see table) |
+| Phase chip dot | `w-1.5 h-1.5 rounded-full` |
+| "..." button | Top-right of card, `tabIndex={-1}` for drag compatibility |
+| Title | `text-sm font-semibold text-text-primary leading-snug` |
+| Description | `text-xs text-text-secondary leading-relaxed line-clamp-2` |
+| Responsible label | `text-[10px] text-text-muted font-label` |
+| Responsible avatar | `w-5 h-5 rounded-full` — `bg-primary/10 border-primary/20` if set; `border-dashed border-border opacity-40` if unset |
+| Divider | `border-t border-border-subtle` inside `mx-3.5 mt-3` |
+| Date icon | 12×12 SVG calendar, monoline stroke |
+| Date text | `text-[10px] font-label` — `text-text-muted` normal; `text-signal-red` overdue |
+| Comment count | Message icon 11×11 + count `text-[10px] font-label text-text-muted` |
+
+### Phase color tokens
+
+| Phase | Chip bg | Chip text | Chip border | Dot | Badge bg | Badge text |
+|---|---|---|---|---|---|---|
+| Backlog | `bg-surface-2` | `text-text-secondary` | `border-border` | `bg-text-muted` | `bg-[#e2e8f4]` | `text-[#4d5b7c]` |
+| A fazer | `bg-[#e8eef8]` | `text-[#303f59]` | `border-[#c8d5ed]` | `bg-[#303f59]` | `bg-[#dce6f8]` | `text-[#303f59]` |
+| Em andamento | `bg-[#e6f7f7]` | `text-[#007a7a]` | `border-[#b3e5e5]` | `bg-primary` | `bg-[#cceeee]` | `text-[#007a7a]` |
+| Aguardando/Bloqueado | `bg-[#fef3e2]` | `text-[#b45309]` | `border-[#f9d9a0]` | `bg-[#fbb33d]` | `bg-[#fde8c8]` | `text-[#b45309]` |
+| Em revisão | `bg-[#eff3fb]` | `text-[#6787bf]` | `border-[#c5d5ef]` | `bg-[#6787bf]` | `bg-[#dce7f8]` | `text-[#6787bf]` |
+| Concluído | `bg-[#f0faf5]` | `text-[#2d8653]` | `border-[#b2dfc8]` | `bg-signal-green` | `bg-[#d4f0e3]` | `text-[#2d8653]` |
+
+### Inline add form
+
+Opens inside the column body (bottom) when "+" is clicked. Contains: Title (required), Descrição (optional, 2 rows), Data limite (optional date), Cancelar + Criar buttons. Pre-selects the column's phase. Closes on Cancelar or after successful create.
+
+### Implementation notes
+
+- Phase chip label for "Aguardando/Bloqueado" truncates to "Aguardando" (chip too narrow for full string).
+- The "..." button on cards and column headers is a visual affordance — behavior to be implemented per context.
+- Responsible avatar shows a generic user icon; wire up `users` name map from parent page when user name data is available.
+- Phase chip appears on cards even within the matching column (provides context in multi-column views like Meu Kanban).
+- CRM Kanban columns represent funnel stages — same card anatomy applies but phase chip shows stage name instead of kanban phase.
+
+---
+
+## TaskModal
+
+Full-page-overlay modal used for creating and editing kanban tasks. Opens on card click (edit mode) or "+" button (create mode).
+
+### Layout (top → bottom)
+
+```
+┌─────────────────────────────────────────────────────┐
+│  [•••]                                          [✕] │  ← top bar
+│  [● Phase chip]  ·  📅 dd mmm yyyy                  │  ← breadcrumb (reactive)
+│                                                     │
+│  Task title (inline editable)                       │  ← title
+│  Criado por: Name · dd/mm/aaaa                      │  ← created-by (edit mode only)
+│                                                     │
+│  RESPONSÁVEL  [select dropdown]                     │
+│  DATA LIMITE  [date input]                          │
+│  FASE         [select dropdown → updates chip]      │
+│                                                     │
+│  DESCRIÇÃO    [RichTextEditor]                      │
+│  LINKS        [url + label pairs, add/remove]       │
+│                                                     │
+│  ATIVIDADES E COMENTÁRIOS                           │
+│  ─────────────────────────────────────────────────  │
+│  [Todos] [Atividades] [Comentários]  (tabs)         │
+│  comment input (textarea, taller)                   │
+│  comment thread                                     │
+│  ─────────────────────────────────────────────────  │
+│  [Cancelar]                    [Criar / Salvar]     │  ← footer
+│  (edit mode adds [Excluir] left of Cancelar)        │
+└─────────────────────────────────────────────────────┘
+```
+
+### Key behaviors
+
+| Behavior | Detail |
+|---|---|
+| Phase chip in breadcrumb | Reactive: updates immediately when FASE select changes |
+| Title | `contentEditable` div; `Enter` blurs instead of inserting newline |
+| FASE select in create mode | Pre-selected to the column where "+" was clicked |
+| FASE select in edit mode | Full select; updates breadcrumb chip live |
+| `onClose` | Closes modal without saving |
+| `onCreate` | Creates task, optimistically adds to board state |
+| `onUpdate` | Updates task, updates board state in-place |
+| `onDelete` | Deletes task, removes from board state |
+
+---
+
+## RichTextEditor
+
+Tiptap-based rich text editor used in TaskModal's DESCRIÇÃO field.
+
+**Extensions**: StarterKit + Underline + TaskList + TaskItem
+
+**Toolbar** (above editor area):
+
+```
+[B] [I] [U]  |  [•] [1.] [☑]
+```
+
+| Button | Action |
+|---|---|
+| **B** | Bold |
+| *I* | Italic |
+| U | Underline |
+| • | BulletList |
+| 1. | OrderedList |
+| ☑ | TaskList (checklist with checkbox items) |
+
+**Key implementation notes**:
+- Toolbar buttons use `onMouseDown={e => e.preventDefault()}` to keep editor focus, then `onClick` to fire the command. Separating these two handlers is required — doing both in `onMouseDown` fires before ProseMirror finalizes the selection.
+- Tailwind Preflight resets `list-style: none` on all `ul`/`ol`. Editor container needs explicit `!important` overrides in `globals.css` inside a `.tiptap-editor` scope.
+- Editor container uses `pl-6 pr-3` (not symmetric `px-3`) to leave space for list markers.
+- Exports `stripHtml(html: string): string` utility — used by `TaskCard` to render a plain-text description preview (`line-clamp-2`).
+- Checked checklist items display `text-decoration: line-through` in the editor and in the card preview.
+
+---
+
+## Meu Kanban — Board Selector
+
+The `/meu-kanban` area uses URL-based routing with a shared layout for board switching.
+
+```
+/meu-kanban        → Meu Kanban (tarefas atribuídas ao usuário em todas as startups)
+/meu-kanban/iaris  → Kanban interno IARIS
+```
+
+**Layout structure** (`meu-kanban/layout.tsx`):
+- Heading "Kanban" + subtitle
+- `<BoardTabs />` below heading (tab bar)
+- `{children}` renders the selected board
+
+**Tab bar** (`BoardTabs.tsx`):
+- Tabs: `Meu Kanban` (exact match `/meu-kanban`) and `IARIS` (`/meu-kanban/iaris`)
+- Active tab: `border-b-2 border-primary text-text-primary`; inactive: `text-text-muted hover:text-text-secondary`
+- Uses `usePathname()` for active detection — bookmarkable, SSR-safe
+
+**Meu Kanban differences from PortfolioKanban**:
+- Shows tasks from **all** startups (plus IARIS is excluded via `is_system` filter)
+- Each card has a **startup name badge** below the phase chip
+- Filters panel: startup dropdown, phase dropdown, overdue-only checkbox + task count
+- Cards open TaskModal in **edit-only** mode (no create from Meu Kanban — create from the startup's own Kanban)
+
+**IARIS Kanban** (`IariasKanban.tsx`):
+- Uses standard `createTask`, `updateTask`, `deleteTask`, `moveTask` from `lib/actions/kanban`
+- Passes `startupId={IARIS_STARTUP_ID}` and `quarter={IARIS_QUARTER}` to TaskModal
+- Same card anatomy as PortfolioKanban (no startup badge — all tasks belong to IARIS)
+- "+" per column opens TaskModal in create mode
+- The IARIS record (`is_system=true`) is excluded from all portfolio listings

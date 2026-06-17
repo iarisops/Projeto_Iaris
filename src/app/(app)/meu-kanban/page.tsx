@@ -5,14 +5,18 @@ export default async function MeuKanbanPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: tasks }, { data: startups }] = await Promise.all([
+  const [{ data: tasks }, { data: startups }, { data: users }] = await Promise.all([
     supabase
       .from('kanban_tasks')
-      .select('id, title, phase, due_date, quarter, startup_id')
+      .select('id, title, description, phase, due_date, quarter, startup_id, responsible_id, comments, links, created_at, created_by')
       .eq('responsible_id', user!.id)
       .order('due_date', { ascending: true, nullsFirst: false }),
     supabase
       .from('portfolio_startups')
+      .select('id, name')
+      .order('name'),
+    supabase
+      .from('users')
       .select('id, name')
       .order('name'),
   ])
@@ -22,6 +26,12 @@ export default async function MeuKanbanPage() {
 
   const enrichedTasks = (tasks ?? []).map((t) => ({
     ...t,
+    description: t.description ?? null,
+    responsible_id: t.responsible_id ?? null,
+    comments: t.comments ?? null,
+    links: Array.isArray(t.links) ? (t.links as { label: string; url: string }[]) : [],
+    created_at: t.created_at ?? null,
+    created_by: t.created_by ?? null,
     startup_name: startupMap[t.startup_id] ?? '—',
   }))
 
@@ -30,15 +40,11 @@ export default async function MeuKanbanPage() {
   )
 
   return (
-    <div className="flex flex-col gap-4 p-6">
-      <div>
-        <h1 className="font-headline text-2xl font-bold text-text-primary">Meu Kanban</h1>
-        <p className="text-sm text-text-muted mt-1">
-          Todas as suas tarefas de todas as startups do portfólio.
-        </p>
-      </div>
-
-      <MeuKanbanClient tasks={enrichedTasks} startupOptions={startupOptions} />
-    </div>
+    <MeuKanbanClient
+      tasks={enrichedTasks}
+      startupOptions={startupOptions}
+      users={users ?? []}
+      currentUserId={user!.id}
+    />
   )
 }

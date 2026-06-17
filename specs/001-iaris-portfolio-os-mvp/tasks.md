@@ -254,6 +254,20 @@
 
 ---
 
+## Phase 10: OperationalHeader v2 + Wiki de Metodologia (post-MVP)
+
+**Purpose**: Cabeçalho da Página Operacional redesenhado com chips coloridos para Tier/Jornada/Engajamento alinhados ao PRD, e página Wiki de metodologia interna.
+
+- [x] T093 [P] Reescrever `OperationalHeader.tsx` com padrão view/edit: chips coloridos para Tier (4 opções com nome e descrição), Status da Jornada (10 opções do PRD §22 com cores únicas) e Engajamento (4 opções incluindo "Crítico"); seleção apenas ao clicar em "Editar"; salvar batch dos 3 campos de uma vez via `updateTierStatus()`; cancelar reverte via `useRef`
+- [x] T094 [P] Adicionar `HelpTooltip` ao `OperationalHeader.tsx`: ícone `?` por campo abre tooltip com nome + descrição + link "Ver na Wiki" — tooltip abre para baixo (`top-full mt-2`) com delay de 180ms para evitar fechar ao mover o mouse; visível tanto em view mode quanto em edit mode
+- [x] T095 [P] Criar `src/app/(app)/wiki/page.tsx` como Server Component: página de metodologia IARIS com seções ancoradas (`#tiers`, `#jornada`, `#engajamento`, `#aderencia`, `#logica`); cards coloridos para cada Tier/Jornada/Engajamento usando o mesmo sistema de cores do `OperationalHeader`; tabela de aderência Tier↔Jornada; cascata lógica Assessment→OKRs→Métricas→Plano→Kanban
+- [x] T096 Atualizar `AppShell.tsx`: link de navegação `href="/wiki"` com label "Wiki" (substituiu `href="/metodologia"` "Metodologia")
+- [x] T097 Corrigir ordem dos blocos em `operacional/page.tsx` para refletir PRD §20.5: Cabeçalho → Resumo de Contexto → Assessment → OKRs → Métricas → Plano de Ação → Kanban → Rituais → Documentos → Atividades
+
+**Checkpoint**: Cabeçalho da Página Operacional mostra chips coloridos por valor; tooltips com link para Wiki; Wiki acessível em `/wiki` com cards e âncoras; blocos na ordem correta do PRD.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

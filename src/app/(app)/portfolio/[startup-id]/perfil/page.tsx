@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { ProfileEditor } from '@/components/portfolio/ProfileEditor'
+import { DocumentsPanel } from '@/components/portfolio/DocumentsPanel'
 
 interface Props {
   params: Promise<{ 'startup-id': string }>
@@ -12,10 +13,10 @@ export default async function PerfilPage({ params }: Props) {
   const { 'startup-id': startupId } = await params
   const supabase = await createClient()
 
-  const [{ data: startup }, { data: sourceCandidate }] = await Promise.all([
+  const [{ data: startup }, { data: sourceCandidate }, { data: documents }] = await Promise.all([
     supabase.from('portfolio_startups').select('*').eq('id', startupId).single(),
-    // Defer source candidate fetch — will be null if no source
     supabase.from('startup_candidates').select('id, name, funnel_id').eq('converted_portfolio_startup_id', startupId).maybeSingle(),
+    supabase.from('documents').select('*').eq('startup_id', startupId).is('kanban_task_id', null).order('created_at', { ascending: false }),
   ])
 
   if (!startup) notFound()
@@ -69,6 +70,7 @@ export default async function PerfilPage({ params }: Props) {
       {/* Body */}
       <div className="p-6 flex flex-col gap-0 max-w-3xl">
         <ProfileEditor startup={startup} />
+        <DocumentsPanel startupId={startupId} initialDocs={documents ?? []} />
 
         {/* Origem no CRM */}
         {sourceCandidate && (

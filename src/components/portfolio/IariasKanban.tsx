@@ -2,32 +2,32 @@
 
 import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { moveTask } from '@/lib/actions/kanban'
+import { createTask, updateTask, deleteTask, moveTask } from '@/lib/actions/kanban'
+import { IARIS_STARTUP_ID, IARIS_QUARTER } from '@/lib/constants'
 import { TaskModal, type Task, type TaskLink } from './TaskModal'
 import { stripHtml } from '@/components/ui/RichTextEditor'
 
 const PHASES = ['Backlog', 'A fazer', 'Em andamento', 'Aguardando/Bloqueado', 'Em revisão', 'Concluído'] as const
 type Phase = typeof PHASES[number]
 
-// Phase color tokens
+// ── Phase tokens ──────────────────────────────────────────────────────────────
+
 const PHASE_TOKEN: Record<Phase, {
   dot: string
   chipBg: string; chipText: string; chipBorder: string; chipLabel: string
   badgeBg: string; badgeText: string
 }> = {
-  'Backlog':              { dot: 'bg-text-muted', chipBg: 'bg-surface-2', chipText: 'text-text-secondary', chipBorder: 'border-border', chipLabel: 'Backlog', badgeBg: 'bg-[#e2e8f4]', badgeText: 'text-[#4d5b7c]' },
-  'A fazer':              { dot: 'bg-[#303f59]', chipBg: 'bg-[#e8eef8]', chipText: 'text-[#303f59]', chipBorder: 'border-[#c8d5ed]', chipLabel: 'A fazer', badgeBg: 'bg-[#dce6f8]', badgeText: 'text-[#303f59]' },
-  'Em andamento':         { dot: 'bg-primary', chipBg: 'bg-[#e6f7f7]', chipText: 'text-[#007a7a]', chipBorder: 'border-[#b3e5e5]', chipLabel: 'Em andamento', badgeBg: 'bg-[#cceeee]', badgeText: 'text-[#007a7a]' },
-  'Aguardando/Bloqueado': { dot: 'bg-[#fbb33d]', chipBg: 'bg-[#fef3e2]', chipText: 'text-[#b45309]', chipBorder: 'border-[#f9d9a0]', chipLabel: 'Aguardando', badgeBg: 'bg-[#fde8c8]', badgeText: 'text-[#b45309]' },
-  'Em revisão':           { dot: 'bg-[#6787bf]', chipBg: 'bg-[#eff3fb]', chipText: 'text-[#6787bf]', chipBorder: 'border-[#c5d5ef]', chipLabel: 'Em revisão', badgeBg: 'bg-[#dce7f8]', badgeText: 'text-[#6787bf]' },
-  'Concluído':            { dot: 'bg-signal-green', chipBg: 'bg-[#f0faf5]', chipText: 'text-[#2d8653]', chipBorder: 'border-[#b2dfc8]', chipLabel: 'Concluído', badgeBg: 'bg-[#d4f0e3]', badgeText: 'text-[#2d8653]' },
+  'Backlog':              { dot: 'bg-text-muted',   chipBg: 'bg-surface-2',   chipText: 'text-text-secondary', chipBorder: 'border-border',      chipLabel: 'Backlog',       badgeBg: 'bg-[#e2e8f4]', badgeText: 'text-[#4d5b7c]' },
+  'A fazer':              { dot: 'bg-[#303f59]',    chipBg: 'bg-[#e8eef8]',   chipText: 'text-[#303f59]',      chipBorder: 'border-[#c8d5ed]',   chipLabel: 'A fazer',       badgeBg: 'bg-[#dce6f8]', badgeText: 'text-[#303f59]' },
+  'Em andamento':         { dot: 'bg-primary',      chipBg: 'bg-[#e6f7f7]',   chipText: 'text-[#007a7a]',      chipBorder: 'border-[#b3e5e5]',   chipLabel: 'Em andamento',  badgeBg: 'bg-[#cceeee]', badgeText: 'text-[#007a7a]' },
+  'Aguardando/Bloqueado': { dot: 'bg-[#fbb33d]',    chipBg: 'bg-[#fef3e2]',   chipText: 'text-[#b45309]',      chipBorder: 'border-[#f9d9a0]',   chipLabel: 'Aguardando',    badgeBg: 'bg-[#fde8c8]', badgeText: 'text-[#b45309]' },
+  'Em revisão':           { dot: 'bg-[#6787bf]',    chipBg: 'bg-[#eff3fb]',   chipText: 'text-[#6787bf]',      chipBorder: 'border-[#c5d5ef]',   chipLabel: 'Em revisão',    badgeBg: 'bg-[#dce7f8]', badgeText: 'text-[#6787bf]' },
+  'Concluído':            { dot: 'bg-signal-green', chipBg: 'bg-[#f0faf5]',   chipText: 'text-[#2d8653]',      chipBorder: 'border-[#b2dfc8]',   chipLabel: 'Concluído',     badgeBg: 'bg-[#d4f0e3]', badgeText: 'text-[#2d8653]' },
 }
 
 interface User { id: string; name: string }
 
-interface PortfolioKanbanProps {
-  startupId: string
-  quarter: string
+interface IariasKanbanProps {
   tasks: Task[]
   users: User[]
   currentUserId?: string
@@ -37,7 +37,7 @@ type ModalState =
   | { mode: 'create'; phase: Phase }
   | { mode: 'edit'; task: Task }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function isOverdue(task: Task): boolean {
   if (!task.due_date || task.phase === 'Concluído') return false
@@ -52,7 +52,7 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────────
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
 function IconCalendar({ className = '' }: { className?: string }) {
   return (
@@ -97,7 +97,7 @@ function IconMessage({ className = '' }: { className?: string }) {
   )
 }
 
-// ── Phase chip ─────────────────────────────────────────────────────────────────
+// ── Phase chip ────────────────────────────────────────────────────────────────
 
 function PhaseChip({ phase }: { phase: string }) {
   const token = PHASE_TOKEN[phase as Phase] ?? PHASE_TOKEN['Backlog']
@@ -109,7 +109,7 @@ function PhaseChip({ phase }: { phase: string }) {
   )
 }
 
-// ── Task card ──────────────────────────────────────────────────────────────────
+// ── Task card ─────────────────────────────────────────────────────────────────
 
 function TaskCard({
   task,
@@ -122,39 +122,38 @@ function TaskCard({
 }) {
   const overdue = isOverdue(task)
   const responsibleName = task.responsible_id ? usersMap[task.responsible_id] : null
+  const descriptionText = stripHtml(task.description)
 
   return (
     <div
       onClick={onClick}
       className={[
         'bg-surface border flex flex-col gap-0 cursor-pointer transition-colors',
-        overdue ? 'border-signal-red/40 hover:border-signal-red/70' : 'border-border hover:border-primary/40',
+        overdue
+          ? 'border-signal-red/40 hover:border-signal-red/70'
+          : 'border-border hover:border-primary/40',
       ].join(' ')}
     >
-      {/* Card header: chip + dots */}
       <div className="flex items-start justify-between gap-2 px-3.5 pt-3.5 pb-2">
         <PhaseChip phase={task.phase} />
         <button
           type="button"
-          className="text-text-muted hover:text-text-secondary transition-colors p-0.5 shrink-0 mt-0.5"
           onClick={(e) => { e.stopPropagation(); onClick() }}
+          className="text-text-muted hover:text-text-secondary transition-colors p-0.5 shrink-0 mt-0.5"
           tabIndex={-1}
         >
           <IconDots />
         </button>
       </div>
 
-      {/* Title */}
       <p className="px-3.5 text-sm font-semibold text-text-primary leading-snug">{task.title}</p>
 
-      {/* Description */}
-      {task.description && (
+      {descriptionText && (
         <p className="px-3.5 mt-1.5 text-xs text-text-secondary leading-relaxed line-clamp-2">
-          {stripHtml(task.description)}
+          {descriptionText}
         </p>
       )}
 
-      {/* Responsible row */}
       <div className="px-3.5 mt-3 flex items-center gap-2">
         <span className="text-[10px] text-text-muted font-label shrink-0">Responsável:</span>
         {responsibleName ? (
@@ -162,7 +161,7 @@ function TaskCard({
             <div className="w-5 h-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
               <span className="text-[9px] font-semibold text-primary leading-none">{initials(responsibleName)}</span>
             </div>
-            <span className="text-[10px] text-text-secondary font-label truncate max-w-[100px]">{responsibleName}</span>
+            <span className="text-[10px] text-text-secondary font-label truncate max-w-[120px]">{responsibleName}</span>
           </div>
         ) : (
           <div className="w-5 h-5 rounded-full border border-dashed border-border flex items-center justify-center">
@@ -171,10 +170,8 @@ function TaskCard({
         )}
       </div>
 
-      {/* Divider */}
       <div className="mx-3.5 mt-3 border-t border-border-subtle" />
 
-      {/* Footer */}
       <div className="px-3.5 py-3 flex items-center gap-3 flex-wrap">
         {task.due_date && (
           <div className={`flex items-center gap-1 ${overdue ? 'text-signal-red' : 'text-text-muted'}`}>
@@ -202,9 +199,9 @@ function TaskCard({
   )
 }
 
-// ── Main component ─────────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 
-export function PortfolioKanban({ startupId, quarter, tasks: initialTasks, users, currentUserId }: PortfolioKanbanProps) {
+export function IariasKanban({ tasks: initialTasks, users, currentUserId }: IariasKanbanProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [modalState, setModalState] = useState<ModalState | null>(null)
 
@@ -241,90 +238,81 @@ export function PortfolioKanban({ startupId, quarter, tasks: initialTasks, users
 
   return (
     <>
-      <div className="flex flex-col gap-3">
-        <h3 className="font-headline text-sm font-semibold text-text-secondary uppercase tracking-wider">Kanban</h3>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {PHASES.map((phase) => {
+            const cards = byPhase(phase)
+            const token = PHASE_TOKEN[phase]
 
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {PHASES.map((phase) => {
-              const cards = byPhase(phase)
-              const token = PHASE_TOKEN[phase]
-
-              return (
-                <div key={phase} className="flex-shrink-0 w-[272px] flex flex-col gap-3">
-
-                  {/* Column header */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-headline text-sm font-semibold text-text-primary truncate">{phase}</span>
-                      <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold font-label ${token.badgeBg} ${token.badgeText}`}>
-                        {cards.length}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setModalState({ mode: 'create', phase })}
-                        className="text-text-muted hover:text-text-primary transition-colors p-1"
-                        aria-label={`Adicionar tarefa em ${phase}`}
-                      >
-                        <IconPlus />
-                      </button>
-                      <button type="button" className="text-text-muted hover:text-text-primary transition-colors p-1" tabIndex={-1}>
-                        <IconDots />
-                      </button>
-                    </div>
+            return (
+              <div key={phase} className="flex-shrink-0 w-[272px] flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-headline text-sm font-semibold text-text-primary truncate">{phase}</span>
+                    <span className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold font-label ${token.badgeBg} ${token.badgeText}`}>
+                      {cards.length}
+                    </span>
                   </div>
-
-                  {/* Column body */}
-                  <Droppable droppableId={phase}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={[
-                          'flex flex-col gap-2.5 p-2 min-h-[240px] border border-border transition-colors',
-                          snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20' : 'bg-surface-2/60',
-                        ].join(' ')}
-                      >
-                        {cards.map((task, index) => (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
-                            {(drag, dragSnapshot) => (
-                              <div
-                                ref={drag.innerRef}
-                                {...drag.draggableProps}
-                                {...drag.dragHandleProps}
-                                className={dragSnapshot.isDragging ? 'opacity-80 rotate-1' : ''}
-                              >
-                                <TaskCard
-                                  task={task}
-                                  usersMap={usersMap}
-                                  onClick={() => setModalState({ mode: 'edit', task })}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setModalState({ mode: 'create', phase })}
+                      className="text-text-muted hover:text-text-primary transition-colors p-1"
+                      aria-label={`Adicionar tarefa em ${phase}`}
+                    >
+                      <IconPlus />
+                    </button>
+                    <button type="button" className="text-text-muted hover:text-text-primary transition-colors p-1" tabIndex={-1}>
+                      <IconDots />
+                    </button>
+                  </div>
                 </div>
-              )
-            })}
-          </div>
-        </DragDropContext>
-      </div>
 
-      {/* Task modal */}
+                <Droppable droppableId={phase}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={[
+                        'flex flex-col gap-2.5 p-2 min-h-[240px] border border-border transition-colors',
+                        snapshot.isDraggingOver ? 'bg-primary/5 border-primary/20' : 'bg-surface-2/60',
+                      ].join(' ')}
+                    >
+                      {cards.map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(drag, dragSnapshot) => (
+                            <div
+                              ref={drag.innerRef}
+                              {...drag.draggableProps}
+                              {...drag.dragHandleProps}
+                              className={dragSnapshot.isDragging ? 'opacity-80 rotate-1' : ''}
+                            >
+                              <TaskCard
+                                task={task}
+                                usersMap={usersMap}
+                                onClick={() => setModalState({ mode: 'edit', task })}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </div>
+            )
+          })}
+        </div>
+      </DragDropContext>
+
       {modalState && (
         <TaskModal
           mode={modalState.mode}
           task={modalState.mode === 'edit' ? modalState.task : undefined}
           defaultPhase={modalState.mode === 'create' ? modalState.phase : undefined}
-          startupId={startupId}
-          quarter={quarter}
+          startupId={IARIS_STARTUP_ID}
+          quarter={IARIS_QUARTER}
           users={users}
           currentUserId={currentUserId}
           usersMap={usersMap}

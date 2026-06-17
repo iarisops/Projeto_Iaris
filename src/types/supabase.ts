@@ -319,6 +319,8 @@ export type Database = {
       }
       crm_activities: {
         Row: {
+          archived_at: string | null
+          archived_by: string | null
           created_at: string | null
           created_by: string | null
           date: string
@@ -334,6 +336,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string | null
           created_by?: string | null
           date: string
@@ -349,6 +353,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string | null
           created_by?: string | null
           date?: string
@@ -364,6 +370,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_activities_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_activities_startup_candidate_id_fkey"
             columns: ["startup_candidate_id"]
@@ -906,6 +919,7 @@ export type Database = {
           iaris_stake: number | null
           icp: string | null
           id: string
+          is_system: boolean
           journey_status: string | null
           last_update_at: string | null
           linkedin: string | null
@@ -939,6 +953,7 @@ export type Database = {
           iaris_stake?: number | null
           icp?: string | null
           id?: string
+          is_system?: boolean
           journey_status?: string | null
           last_update_at?: string | null
           linkedin?: string | null
@@ -972,6 +987,7 @@ export type Database = {
           iaris_stake?: number | null
           icp?: string | null
           id?: string
+          is_system?: boolean
           journey_status?: string | null
           last_update_at?: string | null
           linkedin?: string | null
@@ -1273,6 +1289,7 @@ export type Database = {
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<

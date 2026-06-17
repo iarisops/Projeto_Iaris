@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { Input, Textarea } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { updatePortfolioProfile } from '@/lib/actions/portfolio'
+import { updatePortfolioProfile, uploadLogo } from '@/lib/actions/portfolio'
 import type { Database } from '@/types/supabase'
 
 type Startup = Database['public']['Tables']['portfolio_startups']['Row']
@@ -69,9 +71,29 @@ interface ProfileEditorProps {
 }
 
 export function ProfileEditor({ startup }: ProfileEditorProps) {
+  const router = useRouter()
+  const logoInputRef = useRef<HTMLInputElement>(null)
+
   const [editing, setEditing] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(startup.logo_url)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [logoError, setLogoError] = useState<string | null>(null)
+
+  async function handleLogoUpload(file: File) {
+    setUploadingLogo(true)
+    setLogoError(null)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await uploadLogo(startup.id, fd)
+    setUploadingLogo(false)
+    if (res.error) { setLogoError(res.error); return }
+    if (res.url) {
+      setLogoUrl(res.url)
+      router.refresh()
+    }
+  }
 
   // Local state mirrors startup fields
   const [fields, setFields] = useState({
@@ -130,6 +152,49 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
       {/* Identificação básica */}
       <section className="bg-surface-2 border border-border p-4 flex flex-col gap-3">
         <SectionHeader id="basic" title="Identificação básica" editing={editing} onToggle={toggleEditing} />
+
+        {/* Logo upload */}
+        <div className="flex items-center gap-4">
+          <div className="relative w-16 h-16 bg-surface border border-border flex items-center justify-center shrink-0 overflow-hidden">
+            {logoUrl ? (
+              <Image src={logoUrl} alt={startup.name} width={64} height={64} className="w-full h-full object-contain" />
+            ) : (
+              <span className="font-headline text-2xl font-bold text-primary">
+                {startup.name.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-text-muted font-label uppercase tracking-wide">Logo da startup</p>
+            <label className={[
+              'text-[11px] font-label font-semibold uppercase tracking-wide px-2.5 py-1 border cursor-pointer transition-colors inline-block',
+              uploadingLogo
+                ? 'text-text-muted border-border cursor-not-allowed'
+                : 'text-primary border-primary/30 hover:bg-primary/5',
+            ].join(' ')}>
+              {uploadingLogo ? 'Enviando…' : logoUrl ? 'Trocar imagem' : 'Enviar logo'}
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingLogo}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) handleLogoUpload(file)
+                  e.target.value = ''
+                }}
+              />
+            </label>
+            {logoUrl && (
+              <p className="text-[10px] text-text-muted font-label">
+                PNG, JPG ou SVG · aparece no header e na listagem
+              </p>
+            )}
+            {logoError && <p className="text-[10px] text-signal-red">{logoError}</p>}
+          </div>
+        </div>
+
         {editing === 'basic' ? (
           <div className="flex flex-col gap-3">
             <Input label="Nome" id="name" value={fields.name} onChange={(e) => setField('name', e.target.value)} />
@@ -154,11 +219,11 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Site" value={startup.site} />
-            <Field label="LinkedIn" value={startup.linkedin} />
-            <Field label="Vertical" value={startup.vertical} />
-            <Field label="Segmento" value={startup.segment} />
-            <Field label="Fase" value={startup.stage} />
+            <Field label="Site" value={fields.site} />
+            <Field label="LinkedIn" value={fields.linkedin} />
+            <Field label="Vertical" value={fields.vertical} />
+            <Field label="Segmento" value={fields.segment} />
+            <Field label="Fase" value={fields.stage} />
           </div>
         )}
       </section>
@@ -195,13 +260,13 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <Field label="Descrição" value={startup.short_description} />
-            <Field label="Problema" value={startup.problem} />
-            <Field label="Solução" value={startup.solution} />
-            <Field label="ICP" value={startup.icp} />
-            <Field label="Modelo de negócio" value={startup.business_model} />
-            <Field label="Modelo de receita" value={startup.revenue_model} />
-            {!startup.short_description && !startup.problem && !startup.solution && (
+            <Field label="Descrição" value={fields.short_description} />
+            <Field label="Problema" value={fields.problem} />
+            <Field label="Solução" value={fields.solution} />
+            <Field label="ICP" value={fields.icp} />
+            <Field label="Modelo de negócio" value={fields.business_model} />
+            <Field label="Modelo de receita" value={fields.revenue_model} />
+            {!fields.short_description && !fields.problem && !fields.solution && (
               <p className="text-sm text-text-muted">Nenhuma descrição cadastrada.</p>
             )}
           </div>
@@ -244,25 +309,25 @@ export function ProfileEditor({ startup }: ProfileEditorProps) {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Rodada" value={startup.funding_round} />
-            {startup.funding_target != null && (
+            <Field label="Rodada" value={fields.funding_round} />
+            {fields.funding_target && (
               <div>
                 <p className="text-xs text-text-muted uppercase font-label tracking-wide">Alvo</p>
                 <p className="text-sm text-text-primary">
-                  R$ {startup.funding_target.toLocaleString('pt-BR')}
+                  R$ {Number(fields.funding_target).toLocaleString('pt-BR')}
                 </p>
               </div>
             )}
-            <Field label="Instrumento" value={startup.valuation_instrument} />
-            {startup.iaris_stake != null && (
+            <Field label="Instrumento" value={fields.valuation_instrument} />
+            {fields.iaris_stake && (
               <div>
                 <p className="text-xs text-text-muted uppercase font-label tracking-wide">Stake IARIS</p>
-                <p className="text-sm text-text-primary">{startup.iaris_stake}%</p>
+                <p className="text-sm text-text-primary">{fields.iaris_stake}%</p>
               </div>
             )}
-            <Field label="Captable" value={startup.captable_summary} />
-            <Field label="Uso do capital" value={startup.funding_use} />
-            {!startup.funding_round && !startup.captable_summary && (
+            <Field label="Captable" value={fields.captable_summary} />
+            <Field label="Uso do capital" value={fields.funding_use} />
+            {!fields.funding_round && !fields.captable_summary && (
               <p className="text-sm text-text-muted col-span-2">Nenhum dado de investimento.</p>
             )}
           </div>

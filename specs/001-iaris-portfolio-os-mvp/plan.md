@@ -7,7 +7,7 @@
 ## Summary
 
 Sistema operacional interno da IARIS para gestão de startups da originação (CRM / Investor
-Day) ao portfólio operacional — implementado em Next.js 14 App Router no Vercel, com
+Day) ao portfólio operacional — implementado em Next.js 16.2.9 App Router no Vercel, com
 Supabase (Postgres + Auth + Storage) como única fonte de dados e um worker Node.js local
 para geração de Resumo de Contexto via Ollama.
 
@@ -21,11 +21,11 @@ ambiente exclusiva para servidor.
 **Language/Version**: TypeScript 5.x / Node.js 20 LTS
 
 **Primary Dependencies**:
-- `next` 14+ (App Router, Server Actions, Server Components)
+- `next` 16.2.9 (App Router, Server Actions, Server Components)
 - `@supabase/supabase-js` v2 + `@supabase/ssr` (auth helpers para App Router)
 - `tailwindcss` 3.x (design system tokens via CSS variables)
 - `@hello-pangea/dnd` (Kanban drag-and-drop — fork mantido de react-beautiful-dnd)
-- `next-mdx-remote` (Wiki de Metodologia — MDX estático no repositório)
+- `next-mdx-remote` (instalado, mas Wiki implementada como Server Component em `/wiki`)
 - `zod` (validação de inputs em Server Actions)
 - `date-fns` (cálculo de quarters, atraso de atividades)
 - `exceljs` (import script — lê .xlsm sem depender de COM / Office)
@@ -118,9 +118,14 @@ src/
 │   │       └── [id]/page.tsx
 │   ├── (app)/
 │   │   ├── layout.tsx              # nav principal + guard de autenticação
-│   │   ├── page.tsx                # Home: grid portfólio, Minhas Tarefas, Minhas Atividades
-│   │   ├── meu-kanban/page.tsx     # Meu Kanban consolidado
+│   │   ├── page.tsx                # Home: grid portfólio (.eq is_system false), Minhas Tarefas, Minhas Atividades
+│   │   ├── meu-kanban/
+│   │   │   ├── layout.tsx          # heading + <BoardTabs /> compartilhado
+│   │   │   ├── BoardTabs.tsx       # seletor de board URL-based: "Meu Kanban" | "IARIS"
+│   │   │   ├── page.tsx            # Meu Kanban: tarefas atribuídas ao usuário em todas as startups
+│   │   │   └── iaris/page.tsx      # Kanban interno IARIS (startup_id = IARIS_STARTUP_ID)
 │   │   ├── atividades/page.tsx     # Tabela global de atividades (CRM + portfólio)
+│   │   ├── wiki/page.tsx           # Wiki de metodologia IARIS: Tiers, Jornada, Engajamento, Aderência
 │   │   ├── crm/
 │   │   │   ├── page.tsx            # lista de funis
 │   │   │   └── [funnel-id]/
@@ -131,9 +136,9 @@ src/
 │   │   ├── portfolio/
 │   │   │   └── [startup-id]/
 │   │   │       ├── perfil/page.tsx
-│   │   │       └── operacional/page.tsx
+│   │   │       └── operacional/page.tsx  # blocos na ordem PRD §20.5
 │   │   └── metodologia/
-│   │       └── [...slug]/page.tsx  # MDX Wiki pages
+│   │       └── [...slug]/page.tsx  # MDX (legado — Wiki migrada para /wiki)
 │   └── api/                        # apenas para integração externa (worker opcional)
 │       └── health/route.ts
 ├── components/
@@ -157,14 +162,19 @@ src/
 │   │   └── HomeActivityList.tsx    # atividades unificadas com select de status
 │   ├── atividades/
 │   │   └── AtividadesTable.tsx     # tabela com filtros/sort/paginação
+│   ├── ui/                         # primitivos do design system (Button, Card, Badge…)
+│   │   └── RichTextEditor.tsx      # Tiptap: Bold/Italic/Underline/BulletList/OrderedList/Checklist + stripHtml()
 │   └── portfolio/
 │       ├── AddStartupButton.tsx    # "+ Nova Startup" — criação direta no portfólio
-│       ├── OperationalHeader.tsx
+│       ├── OperationalHeader.tsx   # v2: chips coloridos Tier/Jornada/Engajamento, view/edit, HelpTooltip
 │       ├── AssessmentForm.tsx
 │       ├── OKRSection.tsx
 │       ├── MetricsSection.tsx
 │       ├── ActionPlanSection.tsx
-│       ├── PortfolioKanban.tsx
+│       ├── PortfolioKanban.tsx     # Kanban da página operacional (por startup + quarter)
+│       ├── TaskModal.tsx           # Modal unificado create/edit: breadcrumb, rich text, links, atividades
+│       ├── MeuKanbanClient.tsx     # Visão consolidada: todas as tarefas do usuário + filtros + startup badge
+│       ├── IariasKanban.tsx        # Kanban interno IARIS: usa IARIS_STARTUP_ID/IARIS_QUARTER
 │       ├── RitualsSection.tsx
 │       ├── DocumentsSection.tsx
 │       ├── PortfolioActivitiesSection.tsx  # unifica atividades CRM + portfólio
@@ -183,11 +193,13 @@ src/
 │   │   ├── portfolio.ts            # inclui createPortfolioStartup()
 │   │   ├── okrs.ts
 │   │   ├── metrics.ts
-│   │   ├── kanban.ts
+│   │   ├── kanban.ts               # createTask, updateTask, deleteTask, moveTask (compartilhado)
+│   │   ├── iaris-kanban.ts         # stub vazio — ações IARIS usam kanban.ts diretamente
 │   │   ├── rituals.ts
 │   │   ├── documents.ts
 │   │   ├── activities.ts
 │   │   └── ai-jobs.ts
+│   ├── constants.ts                # IARIS_STARTUP_ID, IARIS_QUARTER
 │   └── utils/
 │       ├── quarter.ts              # currentQuarter(), quarterLabel(), isOverdue()
 │       └── whatsapp.ts             # buildWhatsAppUrl()
@@ -214,7 +226,10 @@ supabase/
 └── migrations/
     ├── 0001_initial_schema.sql     # todas as tabelas + enums
     ├── 0002_seed_criteria.sql      # dados de referência do Critério-v2
-    └── 0003_rls_policies.sql       # Row Level Security (usuários autenticados)
+    ├── 0003_rls_policies.sql       # Row Level Security (usuários autenticados)
+    ├── 0004_...                    # (outras migrations intermediárias)
+    ├── 0007_iaris_tasks.sql        # OBSOLETO — criou iaris_tasks (abordagem errada, dropped em 0008)
+    └── 0008_iaris_portfolio_record.sql  # DROP iaris_tasks; ADD is_system a portfolio_startups; INSERT IARIS
 ```
 
 ## Complexity Tracking

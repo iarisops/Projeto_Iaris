@@ -6,7 +6,7 @@ import { Input, Textarea } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
-import { createActivity, updateActivity } from '@/lib/actions/candidates'
+import { createActivity, updateActivity, archiveActivity, deleteActivity } from '@/lib/actions/candidates'
 import { uploadCRMAttachment } from '@/lib/actions/storage'
 import type { Database } from '@/types/supabase'
 
@@ -20,6 +20,8 @@ interface Props {
   funnelId: string
   items: Activity[]
   users: User[]
+  currentUserId: string
+  isAdmin: boolean
 }
 
 // ── Status cycling ────────────────────────────────────────────────
@@ -80,7 +82,6 @@ function Svg({ children, className = 'w-3.5 h-3.5' }: { children: React.ReactNod
   )
 }
 
-// One icon per activity type + Nota + Anexo + gear
 const TypeIcon = ({ type }: { type: string }) => {
   switch (type) {
     case 'Reunião':
@@ -99,7 +100,7 @@ const TypeIcon = ({ type }: { type: string }) => {
       return <Svg><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></Svg>
     case 'Anexo':
       return <Svg><path d="m18.375 12.739-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 002.112 2.13"/></Svg>
-    default: // Outro
+    default:
       return <Svg><path d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm6 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></Svg>
   }
 }
@@ -112,30 +113,54 @@ function GearIcon() {
   )
 }
 
-// Circle icon per category with color coding
+function ArchiveIcon({ unarchive = false }: { unarchive?: boolean }) {
+  return (
+    <Svg className="w-3.5 h-3.5">
+      {unarchive
+        ? <path d="m9 9 3-3 3 3M12 6v12M4 6h16M4 6a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2"/>
+        : <path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/>
+      }
+    </Svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <Svg className="w-3.5 h-3.5">
+      <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+    </Svg>
+  )
+}
+
 function ItemIconCircle({ item }: { item: Activity }) {
   const cat = itemCategory(item)
   const base = 'w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 border'
 
   if (cat === 'Notas')  return <div className={`${base} bg-[#fffbeb] border-[#fbb33d]/60 text-[#b45309]`}><TypeIcon type="Nota" /></div>
   if (cat === 'Anexos') return <div className={`${base} bg-surface-2 border-border text-text-muted`}><TypeIcon type="Anexo" /></div>
-
-  // Activity — same teal container, different icon per type
   return <div className={`${base} bg-[#eef8f8] border-[#009999]/50 text-[#007a7a]`}><TypeIcon type={item.type} /></div>
 }
 
 // ── TimelineItem ──────────────────────────────────────────────────
 function TimelineItem({
-  item, isLast, userMap, onStatusCycle, onEdit,
+  item, isLast, userMap, currentUserId, isAdmin,
+  onStatusCycle, onEdit, onArchive, onDelete,
 }: {
   item: Activity
   isLast: boolean
   userMap: Record<string, string>
+  currentUserId: string
+  isAdmin: boolean
   onStatusCycle: (id: string, nextStatus: string) => void
   onEdit: (item: Activity) => void
+  onArchive: (id: string, archive: boolean) => void
+  onDelete: (id: string) => void
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const cat  = itemCategory(item)
   const overdue = isOverdue(item)
+  const isArchived = !!item.archived_at
+  const canAct = item.created_by === currentUserId || isAdmin
   const responsibleName = item.responsible_id ? (userMap[item.responsible_id] ?? null) : null
 
   const formattedDate = new Date(item.date).toLocaleString('pt-BR', {
@@ -150,7 +175,8 @@ function TimelineItem({
   }
 
   return (
-    <div id={`activity-${item.id}`} className="flex gap-3 relative pb-4 scroll-mt-4">
+    <div id={`activity-${item.id}`}
+      className={['flex gap-3 relative pb-4 scroll-mt-4', isArchived ? 'opacity-50' : ''].join(' ')}>
       {!isLast && <div className="absolute left-[13px] top-7 bottom-0 w-px bg-border" />}
 
       <ItemIconCircle item={item} />
@@ -167,21 +193,26 @@ function TimelineItem({
                 <span className="text-[10px] font-label uppercase tracking-wide text-text-muted bg-surface-2 border border-border px-1.5 py-0.5">
                   {item.type}
                 </span>
-                {overdue && <Badge variant="red" className="text-[9px]">Atrasada</Badge>}
-                {/* Clickable status badge — cycles on click */}
-                <button
-                  onClick={() => onStatusCycle(item.id, NEXT_STATUS[item.status] ?? 'Pendente')}
-                  title="Clique para alterar status"
-                  className="transition-opacity hover:opacity-75"
-                >
-                  <Badge variant={statusVariant[item.status] ?? 'default'} className="text-[9px] cursor-pointer">
-                    {item.status}
-                  </Badge>
-                </button>
+                {isArchived && <Badge variant="default" className="text-[9px]">Arquivada</Badge>}
+                {!isArchived && overdue && <Badge variant="red" className="text-[9px]">Atrasada</Badge>}
+                {!isArchived && (
+                  <button
+                    onClick={() => onStatusCycle(item.id, NEXT_STATUS[item.status] ?? 'Pendente')}
+                    title="Clique para alterar status"
+                    className="transition-opacity hover:opacity-75"
+                  >
+                    <Badge variant={statusVariant[item.status] ?? 'default'} className="text-[9px] cursor-pointer">
+                      {item.status}
+                    </Badge>
+                  </button>
+                )}
               </>
             )}
             {cat === 'Notas' && (
-              <span className="text-sm font-semibold text-text-primary">Nota</span>
+              <>
+                <span className="text-sm font-semibold text-text-primary">Nota</span>
+                {isArchived && <Badge variant="default" className="text-[9px]">Arquivada</Badge>}
+              </>
             )}
             {cat === 'Anexos' && (
               <>
@@ -193,6 +224,7 @@ function TimelineItem({
                     {attachmentName.split('.').pop()?.toUpperCase()}
                   </span>
                 )}
+                {isArchived && <Badge variant="default" className="text-[9px]">Arquivada</Badge>}
               </>
             )}
           </div>
@@ -221,20 +253,59 @@ function TimelineItem({
               Link externo ↗
             </a>
           )}
+
+          {/* Inline delete confirmation */}
+          {confirmDelete && (
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="text-[11px] text-signal-red font-label">Confirmar exclusão?</span>
+              <button
+                onClick={() => { onDelete(item.id); setConfirmDelete(false) }}
+                className="text-[11px] font-label font-semibold text-signal-red hover:underline"
+              >
+                Sim, excluir
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-[11px] font-label text-text-muted hover:text-text-primary"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right: timestamp + actions */}
         <div className="shrink-0 flex flex-col items-end gap-1.5 min-w-[110px]">
           <span className="text-[10px] text-text-muted font-label text-right leading-snug">{formattedDate}</span>
-          {cat === 'Atividades' && (
-            <button
-              onClick={() => onEdit(item)}
-              title="Editar atividade"
-              className="text-text-muted hover:text-primary transition-colors"
-            >
-              <GearIcon />
-            </button>
-          )}
+          <div className="flex items-center gap-1.5">
+            {cat === 'Atividades' && !isArchived && (
+              <button
+                onClick={() => onEdit(item)}
+                title="Editar atividade"
+                className="text-text-muted hover:text-primary transition-colors"
+              >
+                <GearIcon />
+              </button>
+            )}
+            {canAct && (
+              <button
+                onClick={() => onArchive(item.id, !isArchived)}
+                title={isArchived ? 'Desarquivar' : 'Arquivar'}
+                className="text-text-muted hover:text-primary transition-colors"
+              >
+                <ArchiveIcon unarchive={isArchived} />
+              </button>
+            )}
+            {canAct && (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                title="Excluir"
+                className="text-text-muted hover:text-signal-red transition-colors"
+              >
+                <TrashIcon />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -243,16 +314,17 @@ function TimelineItem({
 
 // ── Edit modal ────────────────────────────────────────────────────
 function EditActivityModal({
-  item,
-  users,
-  onClose,
-  onSaved,
+  item, users, canAct, onClose, onSaved, onArchive, onDelete,
 }: {
   item: Activity
   users: User[]
+  canAct: boolean
   onClose: () => void
   onSaved: (updated: Partial<Activity>) => void
+  onArchive: (id: string, archive: boolean) => void
+  onDelete: (id: string) => void
 }) {
+  const isArchived = !!item.archived_at
   const { date, time } = parseDateParts(item.date)
   const [form, setForm] = useState({
     title:          item.title ?? '',
@@ -264,16 +336,12 @@ function EditActivityModal({
     note:           item.note ?? '',
     external_link:  item.external_link ?? '',
   })
-  const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState<string | null>(null)
+  const [saving,         setSaving]         = useState(false)
+  const [error,          setError]          = useState<string | null>(null)
+  const [confirmDelete,  setConfirmDelete]  = useState(false)
 
   const set = <K extends keyof typeof form>(key: K, val: string) =>
     setForm((f) => ({ ...f, [key]: val }))
-
-  const userOptions = [
-    { value: '', label: '— Nenhum —' },
-    ...users.map((u) => ({ value: u.id, label: u.name })),
-  ]
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -331,9 +399,56 @@ function EditActivityModal({
         <Input label="Link externo" id="ea-link" type="url" value={form.external_link}
           onChange={(e) => set('external_link', e.target.value)} />
         {error && <p className="text-xs text-signal-red">{error}</p>}
-        <div className="flex gap-2 justify-end pt-1">
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" size="sm" disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
+
+        <div className="flex items-center justify-between gap-2 pt-1">
+          {/* Destructive actions — left side */}
+          {canAct && !confirmDelete && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => { onArchive(item.id, !isArchived); onClose() }}
+                className="flex items-center gap-1 text-[11px] font-label text-text-muted hover:text-primary transition-colors"
+              >
+                <ArchiveIcon unarchive={isArchived} />
+                {isArchived ? 'Desarquivar' : 'Arquivar'}
+              </button>
+              <span className="text-border">|</span>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-1 text-[11px] font-label text-text-muted hover:text-signal-red transition-colors"
+              >
+                <TrashIcon />
+                Excluir
+              </button>
+            </div>
+          )}
+          {canAct && confirmDelete && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-signal-red font-label">Confirmar exclusão?</span>
+              <button
+                type="button"
+                onClick={() => { onDelete(item.id); onClose() }}
+                className="text-[11px] font-label font-semibold text-signal-red hover:underline"
+              >
+                Sim, excluir
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="text-[11px] font-label text-text-muted hover:text-text-primary"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+          {!canAct && <span />}
+
+          {/* Save actions — right side */}
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={onClose}>Cancelar</Button>
+            <Button type="submit" size="sm" disabled={saving}>{saving ? 'Salvando…' : 'Salvar'}</Button>
+          </div>
         </div>
       </form>
     </Modal>
@@ -341,14 +456,16 @@ function EditActivityModal({
 }
 
 // ── Main component ────────────────────────────────────────────────
-export function ActivityHistory({ candidateId, funnelId, items: initial, users }: Props) {
-  const [items,     setItems]     = useState(initial)
-  const [filter,    setFilter]    = useState<FilterType>('Todos')
-  const [formMode,  setFormMode]  = useState<FormMode>(null)
+export function ActivityHistory({
+  candidateId, funnelId, items: initial, users, currentUserId, isAdmin,
+}: Props) {
+  const [items,       setItems]       = useState(initial)
+  const [filter,      setFilter]      = useState<FilterType>('Todos')
+  const [showArchived, setShowArchived] = useState(false)
+  const [formMode,    setFormMode]    = useState<FormMode>(null)
   const [editingItem, setEditingItem] = useState<Activity | null>(null)
-  const [loading,   setLoading]   = useState(false)
+  const [loading,     setLoading]     = useState(false)
 
-  // Open edit modal when URL hash matches an activity id (e.g. #activity-{id})
   useEffect(() => {
     const hash = window.location.hash
     if (!hash.startsWith('#activity-')) return
@@ -358,13 +475,13 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
     )
     if (found) setEditingItem(found)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  const [uploading, setUploading] = useState(false)
-  const [, startTransition]       = useTransition()
+
+  const [uploading, setUploading]     = useState(false)
+  const [, startTransition]           = useTransition()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const userMap = Object.fromEntries(users.map((u) => [u.id, u.name]))
 
-  // ── Form states
   const [actForm, setActForm] = useState({
     title: '', type: 'Reunião', responsible_id: '',
     date: todayStr(), time: nowTimeStr(),
@@ -372,15 +489,17 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
   })
   const [noteText, setNoteText] = useState('')
 
-  // ── Counts
+  // ── Counts (exclude archived unless showArchived)
+  const visibleItems = items.filter((i) => showArchived || !i.archived_at)
   const counts = {
-    Todos:      items.length,
-    Notas:      items.filter((i) => i.type === 'Nota').length,
-    Atividades: items.filter((i) => i.type !== 'Nota' && i.type !== 'Anexo').length,
-    Anexos:     items.filter((i) => i.type === 'Anexo').length,
+    Todos:      visibleItems.length,
+    Notas:      visibleItems.filter((i) => i.type === 'Nota').length,
+    Atividades: visibleItems.filter((i) => i.type !== 'Nota' && i.type !== 'Anexo').length,
+    Anexos:     visibleItems.filter((i) => i.type === 'Anexo').length,
   }
+  const archivedCount = items.filter((i) => !!i.archived_at).length
 
-  const filtered = [...items]
+  const filtered = [...visibleItems]
     .filter((i) => {
       if (filter === 'Notas')      return i.type === 'Nota'
       if (filter === 'Atividades') return i.type !== 'Nota' && i.type !== 'Anexo'
@@ -394,6 +513,30 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
     startTransition(async () => {
       await updateActivity(id, { status: nextStatus as 'Pendente' | 'Concluída' | 'Cancelada' })
       setItems((prev) => prev.map((a) => a.id === id ? { ...a, status: nextStatus } : a))
+    })
+  }
+
+  // ── Archive
+  function handleArchive(id: string, archive: boolean) {
+    startTransition(async () => {
+      const res = await archiveActivity(id, archive)
+      if (!res.error) {
+        setItems((prev) => prev.map((a) =>
+          a.id === id
+            ? { ...a, archived_at: archive ? new Date().toISOString() : null, archived_by: archive ? currentUserId : null }
+            : a
+        ))
+      }
+    })
+  }
+
+  // ── Delete
+  function handleDelete(id: string) {
+    startTransition(async () => {
+      const res = await deleteActivity(id)
+      if (!res.error) {
+        setItems((prev) => prev.filter((a) => a.id !== id))
+      }
     })
   }
 
@@ -421,8 +564,9 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
         type: actForm.type, title: actForm.title.trim(), date: isoDate,
         status: actForm.status, responsible_id: actForm.responsible_id || null,
         note: actForm.note || null, external_link: actForm.external_link || null,
+        archived_at: null, archived_by: null,
         created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-        created_by: null, updated_by: null,
+        created_by: currentUserId, updated_by: null,
       }, ...prev])
       setActForm({ title: '', type: 'Reunião', responsible_id: '', date: todayStr(), time: nowTimeStr(), status: 'Pendente', note: '', external_link: '' })
       setFormMode(null)
@@ -447,8 +591,9 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
         id: res.id!, startup_candidate_id: candidateId,
         type: 'Nota', title: null, date: new Date().toISOString(),
         status: 'Concluída', note: noteText.trim(), external_link: null,
+        archived_at: null, archived_by: null,
         responsible_id: null, created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(), created_by: null, updated_by: null,
+        updated_at: new Date().toISOString(), created_by: currentUserId, updated_by: null,
       }, ...prev])
       setNoteText('')
       setFormMode(null)
@@ -479,8 +624,9 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
           id: res.id!, startup_candidate_id: candidateId,
           type: 'Anexo', title: null, date: new Date().toISOString(),
           status: 'Concluída', external_link: url, note: file.name,
+          archived_at: null, archived_by: null,
           responsible_id: null, created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(), created_by: null, updated_by: null,
+          updated_at: new Date().toISOString(), created_by: currentUserId, updated_by: null,
         }, ...prev])
       }
     }
@@ -508,6 +654,19 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
               {f} <span className="opacity-60">{counts[f]}</span>
             </button>
           ))}
+          {archivedCount > 0 && (
+            <button
+              onClick={() => setShowArchived((v) => !v)}
+              className={[
+                'text-[11px] font-label uppercase tracking-wide px-2.5 py-1 border transition-colors',
+                showArchived
+                  ? 'bg-surface-2 text-text-secondary border-border'
+                  : 'text-text-muted border-border border-dashed hover:border-border hover:text-text-secondary',
+              ].join(' ')}
+            >
+              {showArchived ? 'Ocultar arquivadas' : `Arquivadas ${archivedCount}`}
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={() => setFormMode(formMode === 'atividade' ? null : 'atividade')}
@@ -597,8 +756,12 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
               item={item}
               isLast={idx === filtered.length - 1}
               userMap={userMap}
+              currentUserId={currentUserId}
+              isAdmin={isAdmin}
               onStatusCycle={handleStatusCycle}
               onEdit={setEditingItem}
+              onArchive={handleArchive}
+              onDelete={handleDelete}
             />
           ))}
         </div>
@@ -609,11 +772,20 @@ export function ActivityHistory({ candidateId, funnelId, items: initial, users }
         <EditActivityModal
           item={editingItem}
           users={users}
+          canAct={editingItem.created_by === currentUserId || isAdmin}
           onClose={() => setEditingItem(null)}
           onSaved={(updated) => {
             setItems((prev) =>
               prev.map((a) => a.id === editingItem.id ? { ...a, ...updated } : a)
             )
+            setEditingItem(null)
+          }}
+          onArchive={(id, archive) => {
+            handleArchive(id, archive)
+            setEditingItem(null)
+          }}
+          onDelete={(id) => {
+            handleDelete(id)
             setEditingItem(null)
           }}
         />

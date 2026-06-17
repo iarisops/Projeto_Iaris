@@ -96,3 +96,17 @@ export async function moveTask(
   if (error) return { error: error.message }
   return {}
 }
+
+export async function deleteTask(taskId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Não autenticado.' }
+
+  const { error } = await supabase
+    .from('kanban_tasks')
+    .delete()
+    .eq('id', taskId)
+
+  if (error) return { error: error.message }
+  return {}
+}

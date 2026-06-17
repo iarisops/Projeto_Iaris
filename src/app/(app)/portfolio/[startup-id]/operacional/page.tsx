@@ -63,6 +63,8 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
 
   const supabase = await createClient()
 
+  const { data: { user: currentUser } } = await supabase.auth.getUser()
+
   const { data: startup } = await supabase
     .from('portfolio_startups')
     .select('id, name, logo_url, tier, stage, journey_status, engagement, last_update_at, short_description')
@@ -83,6 +85,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
     { data: criteria },
     { data: contextVersions },
     { data: activeJobRow },
+    { data: users },
   ] = await Promise.all([
     supabase
       .from('operational_assessments')
@@ -109,7 +112,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
       .order('created_at'),
     supabase
       .from('kanban_tasks')
-      .select('id, title, description, phase, responsible_id, due_date, comments')
+      .select('id, title, description, phase, responsible_id, due_date, comments, links, created_at, created_by')
       .eq('startup_id', startupId)
       .eq('quarter', quarter)
       .order('created_at'),
@@ -147,6 +150,10 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('users')
+      .select('id, name')
+      .order('name'),
   ])
 
   // Fetch CRM activities from any candidate converted to this portfolio startup
@@ -245,8 +252,28 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
         />
       </div>
 
-      {/* Sections */}
+      {/* Sections — ordem PRD §20.5:
+          1. Cabeçalho (acima)
+          2. Resumo de Contexto
+          3. Objetivos e Indicadores (Assessment → OKRs → Métricas → Plano de Ação)
+          4. Kanban
+          5. Rituais e Reuniões
+          6. Buildagem, Anexos e Evidências
+          7. Relacionamento e Atividades
+      */}
       <div className="flex flex-col gap-10 px-6 pb-12 pt-8 max-w-5xl">
+
+        {/* 2. Resumo de Contexto */}
+        <section>
+          <ContextSection
+            startupId={startupId}
+            lastVersion={(contextVersions ?? [])[0] ?? null}
+            activeJob={activeJobRow ?? null}
+          />
+          <ContextHistory versions={contextVersions ?? []} />
+        </section>
+
+        {/* 3. Objetivos e Indicadores */}
         <section>
           <h2 className="font-headline text-base font-semibold text-text-primary mb-4">Assessment — {quarter}</h2>
           <AssessmentForm
@@ -283,14 +310,23 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 4. Kanban */}
         <section>
           <PortfolioKanban
             startupId={startupId}
             quarter={quarter}
-            tasks={(kanbanTasks ?? []) as Parameters<typeof PortfolioKanban>[0]['tasks']}
+            tasks={(kanbanTasks ?? []).map((t) => ({
+              ...t,
+              links: Array.isArray(t.links) ? (t.links as { label: string; url: string }[]) : [],
+              created_at: t.created_at ?? null,
+              created_by: t.created_by ?? null,
+            }))}
+            users={(users ?? []) as { id: string; name: string }[]}
+            currentUserId={currentUser?.id}
           />
         </section>
 
+        {/* 5. Rituais e Reuniões */}
         <section>
           <RitualsSection
             startupId={startupId}
@@ -298,6 +334,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 6. Buildagem, Anexos e Evidências */}
         <section>
           <DocumentsSection
             startupId={startupId}
@@ -305,6 +342,7 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
+        {/* 7. Relacionamento e Atividades */}
         <section>
           <PortfolioActivitiesSection
             startupId={startupId}
@@ -313,14 +351,6 @@ export default async function OperacionalPage({ params, searchParams }: Props) {
           />
         </section>
 
-        <section>
-          <ContextSection
-            startupId={startupId}
-            lastVersion={(contextVersions ?? [])[0] ?? null}
-            activeJob={activeJobRow ?? null}
-          />
-          <ContextHistory versions={contextVersions ?? []} />
-        </section>
       </div>
     </div>
   )

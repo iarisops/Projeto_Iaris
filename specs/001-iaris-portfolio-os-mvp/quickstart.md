@@ -113,15 +113,28 @@ node worker/index.js
 5. Tentar converter novamente → sistema bloqueia com aviso
 6. Acessar Página Operacional da startup convertida:
    - Filtro de período deve estar no quarter atual
-   - Cabeçalho mostra Tier, Status de Jornada, Engajamento
+   - Cabeçalho mostra chips coloridos de Tier, Status da Jornada e Engajamento (vazio/tracejado se não definido)
+   - Passar o mouse sobre o ícone `?` de cada campo abre tooltip com descrição e link "Ver na Wiki" (abre em nova aba)
+   - Clicar em "Editar" ativa modo de edição: seletores aparecem para os 3 campos
+   - Selecionar Tier 1 ("Observação e Estruturante"), Status "Em Onboarding", Engajamento "Alto" → clicar "Salvar"
+   - Chips coloridos atualizam no cabeçalho; clicar "Cancelar" reverte sem salvar
 7. Criar Assessment para o quarter atual → preencher 6 categorias com sinais e texto
 8. Criar OKR "Atingir 10 clientes ativos" com 2 key results → status padrão "Em andamento"
 9. Atualizar métrica MRR = R$ 8.500 com valor anterior = R$ 7.200
-10. Criar tarefa no Kanban → mover de "Backlog" para "Em andamento"
-    → verificar que o campo `phase` mudou (sem campo `status` separado)
+10. Criar tarefa no Kanban:
+    - Clicar em "+" na coluna "Backlog" → abre TaskModal em modo criação
+    - Preencher título, responsável, data limite; adicionar descrição com formatação rich text (negrito, lista)
+    - Clicar "Criar" → card aparece na coluna com chip de fase, responsável e data
+    - Clicar no card → abre TaskModal em modo edição
+    - Arrastar o card para "Em andamento" → chip de fase atualiza; `phase` no banco mudou
+    - Verificar que não há campo `status` separado (fase = status)
 11. `last_update_at` da startup deve atualizar automaticamente a cada evento
-12. Acessar "Meu Kanban" no dashboard → tarefa aparece com startup vinculada
+12. Acessar "Meu Kanban" → tarefa criada aparece com badge da startup vinculada
+    - Filtrar por startup → apenas tarefas daquela startup visíveis
+    - Clicar em "IARIS" na barra de tabs → abre Kanban interno da IARIS
+    - Criar tarefa no Kanban IARIS; verificar que não aparece na lista do portfólio
 13. Mudar filtro de quarter para quarter anterior → todos os blocos exibem vazio
+    (Meu Kanban e Kanban IARIS não têm filtro de quarter — exibem todas as tarefas)
 
 ---
 
